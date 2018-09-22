@@ -27,12 +27,12 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 {
 
 
-	unsigned char TheMerkleRoot[16];
-	unsigned char mtpHashValue[32];
+
 	MerkleTree::Elements TheElements; // = new MerkleTree;
 	
 	uint32_t *pdata = work->data;
 	uint32_t *ptarget = work->target;
+	((uint64_t*)ptarget)[3] = ((uint64_t*)ptarget)[3];
 	const uint32_t first_nonce = pdata[19];
 
 //	if (opt_benchmark)
@@ -52,18 +52,18 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 	argon2_instance_t instance;
 	argon2_ctx_from_mtp(&context, &instance);
-	TheElements = mtp_init(&instance, TheMerkleRoot);
+	TheElements = mtp_init(&instance);
 	MerkleTree ordered_tree(TheElements, true);
 	MerkleTree::Buffer root = ordered_tree.getRoot();
-	std::copy(root.begin(), root.end(), TheMerkleRoot);
+	std::copy(root.begin(), root.end(), mtp->MerkleRoot);
 	uint32_t throughput = 1;
-	uint32_t foundNonce = StartNonce - first_nonce + throughput;
-	printf ("first nonce %08x: %08x %08x %08x\n", pdata[19] - first_nonce + throughput, pdata[19],first_nonce,throughput);
+	uint32_t foundNonce = StartNonce - first_nonce;
+	printf ("first nonce %08x\n", foundNonce);
 do  {
 		int order = 0;
 
 
-		*hashes_done = StartNonce -  first_nonce /*+ throughput*/;
+//		*hashes_done = StartNonce -  first_nonce /*+ throughput*/;
 	  
 //		foundNonce = 0; //mtp_cpu_hash_32(thr_id, throughput, pdata[19]);
 //		foundNonce = /*pdata[19] -*/ first_nonce + throughput;
@@ -75,15 +75,11 @@ do  {
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			blockS nBlockMTP[72*2];
-			unsigned char nProofMTP[72*3*375];
-//			printf("foundNonce %08x\n",foundNonce);
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,TheMerkleRoot,endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,mtp->MerkleRoot,endiandata, TheUint256Target[0]);
 
 		
 			if (is_sol==1 ) {
-				mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
-
+				mtp_solver(foundNonce, &instance, mtp->nBlockMTP, mtp->nProofMTP, mtp->MerkleRoot, mtp->mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
 				int res = 1;
 			//	work_set_target_ratio(work, vhash64);		
 
@@ -91,23 +87,11 @@ do  {
 
 /// fill mtp structure
 				mtp->MTPVersion = 0x1000;
-				for (int i = 0; i<16; i++)
-					mtp->MerkleRoot[i] = TheMerkleRoot[i];
-				for (int i = 0; i<32; i++)
-					mtp->mtpHashValue[i] = mtpHashValue[i];
-
-				for (int j = 0; j<(MTP_L * 2); j++)
-					for (int i = 0; i<128; i++)
-						mtp->nBlockMTP[j][i] = nBlockMTP[j].v[i];
-				int lenMax = 0;
-				int len = 0;
-
-				memcpy(mtp->nProofMTP, nProofMTP, sizeof(unsigned char)* MTP_L * 3 * 353);
-
 
 				printf("found a solution");
 				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-
+				*hashes_done = foundNonce - first_nonce;
+				printf("hashes done %d /n", hashes_done[0]);
 				return res;
 
 			}// else {foundNonce++;}

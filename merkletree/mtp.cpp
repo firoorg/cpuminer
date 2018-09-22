@@ -406,24 +406,26 @@ argon2_context init_argon2d_param(const char* input) {
 
 
 
+
+
 int mtp_solver(uint32_t TheNonce, argon2_instance_t *instance,
-	blockS *nBlockMTP /*[72 * 2][128]*/,unsigned char* nProofMTP, unsigned char* resultMerkleRoot, unsigned char* mtpHashValue,
-MerkleTree TheTree,uint32_t* input, uint256 hashTarget) {
+	uint64_t nBlockMTP[MTP_BLOCK_PROOF_SIZE * 2][128] /*[72 * 2][128]*/, unsigned char* nProofMTP, unsigned char* resultMerkleRoot, unsigned char* mtpHashValue,
+	MerkleTree TheTree, uint32_t* input, uint256 hashTarget) {
 
 
 
 	if (instance != NULL) {
-//		input[19]=0x01000000;
-		uint256 Y[L+1];
-//		std::string proof_blocks[L * 3];
+		//		input[19]=0x01000000;
+		uint256 Y;
+		//		std::string proof_blocks[L * 3];
 		memset(&Y, 0, sizeof(Y));
-		uint8_t zero[32] = {0};
+		uint8_t zero[32] = { 0 };
 		ablake2b_state BlakeHash;
 		ablake2b_init(&BlakeHash, 32);
-	
+
 		uint32_t Test[4];
 
-	for (int i = 0; i<4;i++)
+		for (int i = 0; i<4; i++)
 			Test[i] = ((uint32_t*)resultMerkleRoot)[i];
 
 
@@ -431,48 +433,52 @@ MerkleTree TheTree,uint32_t* input, uint256 hashTarget) {
 		ablake2b_update(&BlakeHash, (unsigned char*)&input[0], 80);
 		ablake2b_update(&BlakeHash, (unsigned char*)&resultMerkleRoot[0], 16);
 		ablake2b_update(&BlakeHash, &TheNonce, sizeof(unsigned int));
-		ablake2b_final(&BlakeHash, (unsigned char*)&Y[0], 32);
+		ablake2b_final(&BlakeHash, (unsigned char*)&Y, 32);
 
 
 
 		blockS blocks[L * 2];
-		
+
 		///////////////////////////////
 		bool init_blocks = false;
 		bool unmatch_block = false;
-		unsigned char proof_ser[1000]={0};
+		unsigned char proof_ser[1000] = { 0 };
 		unsigned int proof_size;
 		for (uint8_t j = 1; j <= L; j++) {
- 
-			uint32_t ij = (((uint32_t*)(&Y[j - 1]))[0]) % (instance->context_ptr->m_cost );
+
+			uint32_t ij = (((uint32_t*)(&Y))[0]) % (instance->context_ptr->m_cost);
 			uint32_t except_index = (uint32_t)(instance->context_ptr->m_cost / instance->context_ptr->lanes);
 			if (ij %except_index == 0 || ij%except_index == 1) {
 				init_blocks = true;
 				break;
 			}
- 
+
 			uint32_t prev_index;
 			uint32_t ref_index;
 			getblockindex(ij, instance, &prev_index, &ref_index);
- 
-			copy_blockS(&nBlockMTP[j * 2 - 2], &instance->memory[prev_index]);
-			//ref block
-			copy_blockS(&nBlockMTP[j * 2 - 1], &instance->memory[ref_index]);
+
+
+
+
+				for (int i = 0; i<128; i++)
+					nBlockMTP[j*2-2][i] = instance->memory[prev_index].v[i];
+				for (int i = 0; i<128; i++)
+					nBlockMTP[j * 2 - 1][i] = instance->memory[ref_index].v[i];
 
 			block blockhash;
 			uint8_t blockhash_bytes[ARGON2_BLOCK_SIZE];
 			copy_block(&blockhash, &instance->memory[ij]);
 
- 
+
 			store_block(&blockhash_bytes, &blockhash);
 
 			ablake2b_state BlakeHash2;
 			ablake2b_init(&BlakeHash2, 32);
-			ablake2b_update(&BlakeHash2, &Y[j - 1], sizeof(uint256));
+			ablake2b_update(&BlakeHash2, &Y, sizeof(uint256));
 			ablake2b_update(&BlakeHash2, blockhash_bytes, ARGON2_BLOCK_SIZE);
-			ablake2b_final(&BlakeHash2, (unsigned char*)&Y[j], 32);
-////////////////////////////////////////////////////////////////
-// current block
+			ablake2b_final(&BlakeHash2, (unsigned char*)&Y, 32);
+			////////////////////////////////////////////////////////////////
+			// current block
 
 			unsigned char curr[32] = { 0 };
 			block blockhash_curr;
@@ -493,14 +499,14 @@ MerkleTree TheTree,uint32_t* input, uint256 hashTarget) {
 
 			nProofMTP[(j * 3 - 3) * 353] = (unsigned char)(zProofMTP.size());
 
-			int k1=0;
-			for (const std::vector<uint8_t> &mtpData : zProofMTP) {	
-			std::copy(mtpData.begin(),mtpData.end(), nProofMTP +((j * 3 - 3) * 353 + 1 + k1 * mtpData.size()));
-			k1++;
+			int k1 = 0;
+			for (const std::vector<uint8_t> &mtpData : zProofMTP) {
+				std::copy(mtpData.begin(), mtpData.end(), nProofMTP + ((j * 3 - 3) * 353 + 1 + k1 * mtpData.size()));
+				k1++;
 			}
 
 			//prev proof
-			unsigned char prev[32]={0};
+			unsigned char prev[32] = { 0 };
 			block blockhash_prev;
 			uint8_t blockhash_prev_bytes[ARGON2_BLOCK_SIZE];
 			copy_block(&blockhash_prev, &instance->memory[prev_index]);
@@ -513,7 +519,7 @@ MerkleTree TheTree,uint32_t* input, uint256 hashTarget) {
 
 			ablake2b4rounds_final(&state_prev, digest_prev, sizeof(digest_prev));
 
- 
+
 			MerkleTree::Buffer hash_prev = MerkleTree::Buffer(digest_prev, digest_prev + sizeof(digest_prev));
 			clear_internal_memory(blockhash_prev.v, ARGON2_BLOCK_SIZE);
 			clear_internal_memory(blockhash_prev_bytes, ARGON2_BLOCK_SIZE);
@@ -555,41 +561,39 @@ MerkleTree TheTree,uint32_t* input, uint256 hashTarget) {
 			}
 
 
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
+			/////////////////////////////////////////////////////////////////////
+			/////////////////////////////////////////////////////////////////////
 		}
 
 		if (init_blocks) {
- 
+
 			return 0;
 		}
 
- 
+
 		char hex_tmp[64];
- 
-		if (Y[L] > hashTarget) {
+
+		if (Y > hashTarget) {
 
 		}
 		else {
-			for (int i=0;i<32;i++)
-			mtpHashValue[i]= (((unsigned char*)(&Y[L]))[i]);
+			for (int i = 0; i<32; i++)
+				mtpHashValue[i] = (((unsigned char*)(&Y))[i]);
 
 			// Found a solution
-			printf("Found a solution. Nonce=%08x Hash:",TheNonce);
-			for (int n = 0; n < 32; n++) {
-				printf("%02x", ((unsigned char*)&Y[0])[n]);
-			}
+			printf("Found a solution. Nonce=%08x Hash:", TheNonce);
 			printf("\n");
 			return 1;
 
 
 		}
- 
+
 	}
- 
+
 
 	return 0;
 }
+
 
 int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget) {
@@ -655,11 +659,14 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 //				mtpHashValue[i] = (((unsigned char*)(&Y[L]))[i]);
 
 			// Found a solution
+			/*
 			printf("Found a solution. Nonce=%08x Hash:", TheNonce);
 			for (int n = 0; n < 32; n++) {
 				printf("%02x", ((unsigned char*)&Y)[n]);
 			}
 			printf("\n");
+
+			*/
 			return 1;
 
 
@@ -673,7 +680,7 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 
 
 
-MerkleTree::Elements mtp_init( argon2_instance_t *instance, unsigned char *resultMerkleRoot) {
+MerkleTree::Elements mtp_init( argon2_instance_t *instance) {
 	//internal_kat(instance, r); /* Print all memory blocks */
 	printf("Step 1 : Compute F(I) and store its T blocks X[1], X[2], ..., X[T] in the memory \n");
 	// Step 1 : Compute F(I) and store its T blocks X[1], X[2], ..., X[T] in the memory
@@ -702,12 +709,7 @@ MerkleTree::Elements mtp_init( argon2_instance_t *instance, unsigned char *resul
 			clear_internal_memory(blockhash_bytes, ARGON2_BLOCK_SIZE);
 
 		}
-/*
-		MerkleTree ordered_tree(elements, true);
 
-		MerkleTree::Buffer root = ordered_tree.getRoot();
-		std::copy(root.begin(), root.end(), resultMerkleRoot);
-*/
 
 		printf("end Step 2 : Compute the root Φ of the Merkle hash tree \n");
 		return elements;
