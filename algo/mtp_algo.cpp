@@ -1,7 +1,7 @@
 
 
 
-#include "argon2ref/argon2.h"
+//#include "argon2ref/argon2.h"
 #include "merkletree/mtp.h"
 
 #include <unistd.h>
@@ -26,13 +26,15 @@ extern "C"
 int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp)
 {
 
-
+	CURL *curl;
+	curl = curl_easy_init();
+//	compare_height(curl,work);
 
 	MerkleTree::Elements TheElements; // = new MerkleTree;
 	
 	uint32_t *pdata = work->data;
 	uint32_t *ptarget = work->target;
-	((uint64_t*)ptarget)[3] = ((uint64_t*)ptarget)[3];
+//	((uint64_t*)ptarget)[3] = ((uint64_t*)ptarget)[3]/(1024*1);
 	const uint32_t first_nonce = pdata[19];
 
 //	if (opt_benchmark)
@@ -50,15 +52,15 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 //	((uint32_t*)pdata)[19] = 0;
 	argon2_context context = init_argon2d_param((const char*)endiandata);
 
-	argon2_instance_t instance;
-	argon2_ctx_from_mtp(&context, &instance);
-	TheElements = mtp_init(&instance);
+//	argon2_instance_t instance;
+	argon2_ctx_from_mtp(&context, &mtp->MyArgonInstance);
+	TheElements = mtp_init(&mtp->MyArgonInstance);
 	MerkleTree ordered_tree(TheElements, true);
 	MerkleTree::Buffer root = ordered_tree.getRoot();
 	std::copy(root.begin(), root.end(), mtp->MerkleRoot);
 	uint32_t throughput = 1;
-	uint32_t foundNonce = StartNonce - first_nonce;
-	printf ("first nonce %08x\n", foundNonce);
+	uint32_t foundNonce = StartNonce /*- first_nonce*/;
+	printf ("first nonce %08x thread id %d \n", foundNonce,thr_id);
 do  {
 		int order = 0;
 
@@ -75,23 +77,35 @@ do  {
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,mtp->MerkleRoot,endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &mtp->MyArgonInstance,mtp->MerkleRoot,endiandata, TheUint256Target[0]);
 
-		
-			if (is_sol==1 ) {
-				mtp_solver(foundNonce, &instance, mtp->nBlockMTP, mtp->nProofMTP, mtp->MerkleRoot, mtp->mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
+
+			if (is_sol==1 && !work_restart[thr_id].restart) {
+
+				mtp_solver(foundNonce, &mtp->MyArgonInstance, mtp->nBlockMTP, mtp->nProofMTP, mtp->MerkleRoot, mtp->mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
 				int res = 1;
 			//	work_set_target_ratio(work, vhash64);		
-
+				printf("work restart status %d threadId %d\n", work_restart[thr_id].restart,thr_id);
+				if (!compare_height(curl,work))
+				{ 
+					free_memory(&context, (unsigned char *)mtp->MyArgonInstance.memory, mtp->MyArgonInstance.memory_blocks, sizeof(block));
+					*hashes_done = StartNonce - first_nonce;
+					//	delete TheTree;
+					ordered_tree.~MerkleTree();
+					TheElements.clear();
+					return 0;
+				}
 				pdata[19] = swab32(foundNonce);
 
 /// fill mtp structure
 				mtp->MTPVersion = 0x1000;
 
-				printf("found a solution");
-				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+				printf("found a solution thr_id %d\n",thr_id);
+				compare_height(curl, work);
+				free_memory(&context, (unsigned char *)mtp->MyArgonInstance.memory, mtp->MyArgonInstance.memory_blocks, sizeof(block));
 				*hashes_done = foundNonce - first_nonce;
-				printf("hashes done %d /n", hashes_done[0]);
+
+				printf("hashes done %d thr_id %d\n", hashes_done[0],thr_id);
 				return res;
 
 			}// else {foundNonce++;}
@@ -100,8 +114,8 @@ do  {
 		StartNonce += throughput;
 		}
 
-	}   while (!work_restart[thr_id].restart && StartNonce<0xeffffff);
-	free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+	}   while (!work_restart[thr_id].restart && StartNonce<0xffffffff);
+	free_memory(&context, (unsigned char *)mtp->MyArgonInstance.memory, mtp->MyArgonInstance.memory_blocks, sizeof(block));
 	*hashes_done = StartNonce - first_nonce;
 //	delete TheTree;
 	ordered_tree.~MerkleTree();

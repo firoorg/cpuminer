@@ -1,6 +1,12 @@
 #ifndef __MINER_H__
 #define __MINER_H__
 
+
+//mtp
+
+#include "argon2ref/argon2.h"
+//
+#
 #include <cpuminer-config.h>
 
 #define USER_AGENT PACKAGE_NAME "/" PACKAGE_VERSION
@@ -23,6 +29,8 @@
 #endif
 
 #endif /* _MSC_VER */
+
+
 
 #include <stdbool.h>
 #include <inttypes.h>
@@ -195,6 +203,14 @@ void sha256_init_8way(uint32_t *state);
 void sha256_transform_8way(uint32_t *state, const uint32_t *block, int swap);
 #endif
 #endif
+
+
+extern char *rpc_url;
+extern char *rpc_userpass;
+extern char *rpc_user, *rpc_pass;
+extern bool compare_height(CURL *curl, struct work *work);
+//uint64_t net_blocks = 0;
+
 
 struct work;
 int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp);
@@ -424,6 +440,7 @@ struct mtp {
 	uint64_t nBlockMTP[MTP_L * 2][128];
 	unsigned char nProofMTP[MTP_L * 3 * 353]; // largest estimate
 	uint32_t sizeProofMTP[MTP_L * 3];
+	argon2_instance_t MyArgonInstance;
 };
 
 
@@ -571,6 +588,8 @@ void x17hash(void *output, const void *input);
 void zr5hash(void *output, const void *input);
 void yescrypthash(void *output, const void *input);
 void zr5hash_pok(void *output, uint32_t *pdata);
+
+
 
 
 #endif /* __MINER_H__ */

@@ -2316,6 +2316,72 @@ void applog_hash64(void *hash)
 }
 
 
+
+bool compare_height(CURL *curl, struct work *work)
+{
+	static const char *info_req =
+		"{\"method\": \"getmininginfo\", \"params\": [], \"id\":8}\r\n";
+
+uint64_t net_blocks = 0;
+
+	int curl_err = 0;
+	json_t *val = json_rpc_call(curl, rpc_url, rpc_userpass, info_req, &curl_err, 0);
+
+
+		json_t *res = json_object_get(val, "result");
+		// "blocks": 491493 (= current work height - 1)
+		// "difficulty": 0.99607860999999998
+		// "networkhashps": 56475980
+		if (res) {
+			json_t *key = json_object_get(res, "difficulty");
+			if (key) {
+				if (json_is_object(key))
+					key = json_object_get(key, "proof-of-work");
+				if (json_is_real(key))
+					net_diff = json_real_value(key);
+			}
+			key = json_object_get(res, "networkhashps");
+			if (key && json_is_integer(key)) {
+				net_hashrate = (double)json_integer_value(key);
+			}
+			key = json_object_get(res, "blocks");
+			if (key && json_is_integer(key)) {
+				net_blocks = json_integer_value(key);
+			}
+printf("work height %d net_blocks %d \n",work->height,net_blocks);
+			if ((net_blocks+1)==work->height)
+				return true;
+			else 
+				return false;
+
+			/*
+			if (!work->height) {
+				// complete missing data from getwork
+				work->height = (uint32_t)net_blocks + 1;
+				if (work->height > g_work.height) {
+					restart_threads();
+					if (!opt_quiet) {
+						char netinfo[64] = { 0 };
+						char srate[32] = { 0 };
+						sprintf(netinfo, "diff %.2f", net_diff);
+						if (net_hashrate) {
+							format_hashrate(net_hashrate, srate);
+							strcat(netinfo, ", net ");
+							strcat(netinfo, srate);
+						}
+						applog(LOG_BLUE, "%s block %d, %s",
+							algo_names[opt_algo], work->height, netinfo);
+					}
+				}
+			}
+		*/
+		}
+	
+	json_decref(val);
+	return true;
+}
+
+
 #define printpfx(n,h) \
 	printf("%s%11s%s: %s\n", CL_CYN, n, CL_N, format_hash(s, (uint8_t*) h))
 
