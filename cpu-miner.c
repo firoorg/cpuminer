@@ -1029,7 +1029,7 @@ out:
 			tq_push(thr_info[longpoll_thr_id].q, lp_uri);
 		}
 	}
-
+	restart_threads();
 	free(merkle_tree);
 	free(cbtx);
 	return rc;
@@ -1231,7 +1231,7 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 		base58_decode("a1kCCGddf5pMXSipLVD9hBG2MGGVNaJ15U", script_payee);
 		job_pack_tx(coinb5, 50000000, script_payee);
 		*/
-/* for testnet with znode payment
+/* for testnet with znode payment */
 		base58_decode("TDk19wPKYq91i18qmY6U9FeTdTxwPeSveo", script_payee);
 		job_pack_tx(coinb1, 50000000, script_payee);
 
@@ -1246,7 +1246,7 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 
 		base58_decode("TCsTzQZKVn4fao8jDmB9zQBk9YQNEZ3XfS", script_payee);
 		job_pack_tx(coinb5, 50000000, script_payee);
-*/
+/*
 		base58_decode("TDk19wPKYq91i18qmY6U9FeTdTxwPeSveo", script_payee);
 		job_pack_tx(coinb1, 100000000, script_payee);
 
@@ -1261,7 +1261,7 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 
 		base58_decode("TCsTzQZKVn4fao8jDmB9zQBk9YQNEZ3XfS", script_payee);
 		job_pack_tx(coinb5, 100000000, script_payee);
-
+*/
 
 		if (mpay && json_integer_value(mnamount) != 0) {
 			base58_decode((char*)json_string_value(mnaddy), script_payee);
@@ -1440,7 +1440,7 @@ out:
 			tq_push(thr_info[longpoll_thr_id].q, lp_uri);
 		}
 	}
-
+	restart_threads();
 	free(merkle_tree);
 	free(cbtx);
 	return rc;
@@ -3117,7 +3117,7 @@ void restart_threads(void)
 
 	for (i = 0; i < opt_n_threads; i++) {
 		work_restart[i].restart = 1;
-	printf("restarting thread %d \n",i);
+	printf ("restart these threads %d restart %d",i, work_restart[i].restart);
 	}
 
 }
@@ -3181,11 +3181,10 @@ start:
 			if (have_gbt) {
 				req = (char*) malloc(strlen(gbt_lp_req) + strlen(lp_id) + 1);
 				sprintf(req, gbt_lp_req, lp_id);
-			}
+			val = json_rpc_call(curl, lp_url, rpc_userpass, req /*? req : getwork_req*/, &err, JSON_RPC_LONGPOLL);
+			} else {
 			val = json_rpc_call(curl, rpc_url, rpc_userpass, getwork_req, &err, JSON_RPC_LONGPOLL);
-			val = json_rpc_call(curl, lp_url, rpc_userpass,
-					    req ? req : getwork_req, &err,
-					    JSON_RPC_LONGPOLL);
+			}
 			free(req);
 		}
 
@@ -3214,6 +3213,7 @@ start:
 			} else
 				rc = work_decode(res, &g_work);
 			if (rc) {
+				
 				bool newblock = g_work.job_id && strcmp(start_job_id, g_work.job_id);
 				newblock |= (start_diff != net_diff); // the best is the height but... longpoll...
 				if (newblock) {

@@ -72,7 +72,8 @@ do  {
 		uint32_t _ALIGN(64) vhash64[8];
 		if (foundNonce != UINT32_MAX)
 		{
-			
+			if(work_restart[thr_id].restart==1)
+				printf("work restart is 1 on thread %d",thr_id);
 			block_mtpProof TheBlocksAndProofs[140];
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
