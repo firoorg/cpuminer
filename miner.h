@@ -440,7 +440,6 @@ struct mtp {
 	uint64_t nBlockMTP[MTP_L * 2][128];
 	unsigned char nProofMTP[MTP_L * 3 * 353]; // largest estimate
 	uint32_t sizeProofMTP[MTP_L * 3];
-	argon2_instance_t MyArgonInstance;
 };
 
 

@@ -615,14 +615,7 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 		ablake2b_update(&BlakeHash, (unsigned char*)&resultMerkleRoot[0], 16);
 		ablake2b_update(&BlakeHash, &TheNonce, sizeof(unsigned int));
 		ablake2b_final(&BlakeHash, (unsigned char*)&Y, 32);
-/*
-		blake2b_ctx BlakeHash;
-		blake2b_init(&BlakeHash, 32,NULL,0);
-		blake2b_update(&BlakeHash, (unsigned char*)&input[0], 80);
-		blake2b_update(&BlakeHash, (unsigned char*)&resultMerkleRoot[0], 16);
-		blake2b_update(&BlakeHash, &TheNonce, sizeof(unsigned int));
-		blake2b_final(&BlakeHash, (unsigned char*)&Y);
-*/
+
 		///////////////////////////////
 		bool init_blocks = false;
 		bool unmatch_block = false;
@@ -641,12 +634,6 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 			ablake2b_update(&BlakeHash, &instance->memory[ij].v, ARGON2_BLOCK_SIZE);
 			ablake2b_final(&BlakeHash, (unsigned char*)&Y, 32);
 
-/*
-			blake2b_init(&BlakeHash, 32,NULL,0);
-			blake2b_update(&BlakeHash, &Y, sizeof(uint256));
-			blake2b_update(&BlakeHash, &instance->memory[ij].v, ARGON2_BLOCK_SIZE);
-			blake2b_final(&BlakeHash, (unsigned char*)&Y);
-*/
 		}
 
 		if (init_blocks) 
