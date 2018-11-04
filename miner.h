@@ -208,7 +208,7 @@ void sha256_transform_8way(uint32_t *state, const uint32_t *block, int swap);
 extern char *rpc_url;
 extern char *rpc_userpass;
 extern char *rpc_user, *rpc_pass;
-extern bool compare_height(CURL *curl, struct work *work);
+
 //uint64_t net_blocks = 0;
 
 
@@ -590,6 +590,6 @@ void yescrypthash(void *output, const void *input);
 void zr5hash_pok(void *output, uint32_t *pdata);
 
 
-
+extern bool compare_height(CURL *curl, struct work *work);
 
 #endif /* __MINER_H__ */
