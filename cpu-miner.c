@@ -1997,7 +1997,6 @@ static void workio_cmd_free(struct workio_cmd *wc)
 
 	switch (wc->cmd) {
 	case WC_SUBMIT_WORK:
-printf("workio_cmd_free\n");
 		work_free(wc->u.work);
 		free(wc->u.work);
 		free(wc->t.mtp);
@@ -3207,11 +3206,9 @@ start:
 			pthread_mutex_lock(&g_work_lock);
 			start_job_id = g_work.job_id ? strdup(g_work.job_id) : NULL;
 			if (have_gbt) {
-				if (opt_algo == ALGO_MTP) {
-			printf("before gbt decode longpoll\n");
+				if (opt_algo == ALGO_MTP) 
 					rc = gbt_work_decode_mtp(res, &g_work);
-			printf("before gbt decode longpoll\n");
-			}	else 
+				else 
 					rc = gbt_work_decode(res, &g_work);
 			} else
 				rc = work_decode(res, &g_work);
@@ -3234,7 +3231,7 @@ start:
 					restart_threads();
 				}
 			}
-//			free(start_job_id);
+			free(start_job_id);
 			pthread_mutex_unlock(&g_work_lock);
 			json_decref(val);
 		} else {
@@ -3246,8 +3243,8 @@ start:
 			} else {
 				have_longpoll = false;
 				restart_threads();
-//				free(hdr_path);
-//				free(lp_url);
+				free(hdr_path);
+				free(lp_url);
 				lp_url = NULL;
 				sleep(opt_fail_pause);
 				goto start;
@@ -3256,8 +3253,8 @@ start:
 	}
 
 out:
-//	free(hdr_path);
-//	free(lp_url);
+	free(hdr_path);
+	free(lp_url);
 	tq_freeze(mythr->q);
 	if (curl)
 		curl_easy_cleanup(curl);
