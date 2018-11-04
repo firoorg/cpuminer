@@ -38,7 +38,6 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 	uint32_t *pdata = work->data;
 	uint32_t *ptarget = work->target;
-	ptarget[7] = 0x10c6f8;
 	const uint32_t first_nonce = pdata[19];
 
 	//	if (opt_benchmark)

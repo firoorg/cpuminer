@@ -3206,9 +3206,11 @@ start:
 			pthread_mutex_lock(&g_work_lock);
 			start_job_id = g_work.job_id ? strdup(g_work.job_id) : NULL;
 			if (have_gbt) {
-				if (opt_algo == ALGO_MTP)
+				if (opt_algo == ALGO_MTP) {
+			printf("before gbt decode longpoll\n");
 					rc = gbt_work_decode_mtp(res, &g_work);
-				else 
+			printf("before gbt decode longpoll\n");
+			}	else 
 					rc = gbt_work_decode(res, &g_work);
 			} else
 				rc = work_decode(res, &g_work);
