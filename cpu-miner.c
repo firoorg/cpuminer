@@ -1123,7 +1123,7 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 		applog(LOG_ERR, "JSON invalid bits");
 		goto out;
 	}
-
+	
 	// find count and size of transactions 
 	txa = json_object_get(val, "transactions");
 	if (!txa || !json_is_array(txa)) {

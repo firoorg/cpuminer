@@ -109,7 +109,18 @@ cpuminer_SOURCES = \
   algo/x17.c \
   algo/xevan.c \
   algo/yescrypt.c \
-  algo/zr5.c
+  algo/zr5.c \
+  algo/mtp_algo.cpp \
+  merkletree/merkle-tree.cpp 	merkletree/merkle-tree.hpp \
+  merkletree/mtp.h 	  merkletree/mtp.cpp \
+  merkletree/serialize.h \
+  argon2ref/argon2.c  argon2ref/blake2ba.c  argon2ref/blake2-impl.h \      
+  argon2ref/blamka-round-ref.h  argon2ref/core.h  \    
+  argon2ref/encoding.h  argon2ref/thread.c  \
+  argon2ref/argon2.h  argon2ref/blake2.h    \
+  argon2ref/blamka-round-opt.h  argon2ref/core.c   \           
+  argon2ref/encoding.c  argon2ref/ref.c   argon2ref/thread.h \
+
 
 disable_flags =
 
