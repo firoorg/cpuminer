@@ -1997,6 +1997,7 @@ static void workio_cmd_free(struct workio_cmd *wc)
 
 	switch (wc->cmd) {
 	case WC_SUBMIT_WORK:
+printf("workio_cmd_free\n");
 		work_free(wc->u.work);
 		free(wc->u.work);
 		free(wc->t.mtp);
@@ -3233,7 +3234,7 @@ start:
 					restart_threads();
 				}
 			}
-			free(start_job_id);
+//			free(start_job_id);
 			pthread_mutex_unlock(&g_work_lock);
 			json_decref(val);
 		} else {
@@ -3245,8 +3246,8 @@ start:
 			} else {
 				have_longpoll = false;
 				restart_threads();
-				free(hdr_path);
-				free(lp_url);
+//				free(hdr_path);
+//				free(lp_url);
 				lp_url = NULL;
 				sleep(opt_fail_pause);
 				goto start;
@@ -3255,8 +3256,8 @@ start:
 	}
 
 out:
-	free(hdr_path);
-	free(lp_url);
+//	free(hdr_path);
+//	free(lp_url);
 	tq_freeze(mythr->q);
 	if (curl)
 		curl_easy_cleanup(curl);
