@@ -1,6 +1,5 @@
 
 
-
 //#include "argon2ref/argon2.h"
 #include "merkletree/mtp.h"
 
@@ -51,20 +50,43 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 	((uint32_t*)pdata)[19] = 0x00100000; // mtp version not the actual nonce
 	for (int k = 0; k < 20; k++)
 		be32enc(&endiandata[k], pdata[k]);
-	gettimeofday(&tv_start, NULL);
+
+	if (work_restart[thr_id].restart == 1)
+		return 0;
+
+
 	//	((uint32_t*)pdata)[19] = 0;
 	argon2_context context = init_argon2d_param((const char*)endiandata);
 	argon2_instance_t instance;
 	argon2_ctx_from_mtp(&context, &instance);
+	if (work_restart[thr_id].restart == 1) {
+		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+		return 0;
+	}
 	TheElements = mtp_init(&instance);
+	if (work_restart[thr_id].restart == 1) {
+		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+		return 0;
+	}
 	MerkleTree ordered_tree(TheElements, true);
+	if (work_restart[thr_id].restart == 1) {
+		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+		return 0;
+	}
 	MerkleTree::Buffer root = ordered_tree.getRoot();
+	if (work_restart[thr_id].restart == 1) {
+		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+		return 0;
+	}
 	std::copy(root.begin(), root.end(), TheMerkleRoot);
+	if (work_restart[thr_id].restart == 1) {
+		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+		return 0;
+	}
 
 
 
-
-
+	gettimeofday(&tv_start, NULL);
 
 	uint32_t throughput = 1;
 	uint32_t foundNonce = StartNonce /*- first_nonce*/;
@@ -78,12 +100,11 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 		//		foundNonce = 0; //mtp_cpu_hash_32(thr_id, throughput, pdata[19]);
 		//		foundNonce = /*pdata[19] -*/ first_nonce + throughput;
-		uint32_t _ALIGN(64) vhash64[8];
-		if (foundNonce != UINT32_MAX)
+
+		if (foundNonce != UINT32_MAX && work_restart[thr_id].restart != 1)
 		{
-			if (work_restart[thr_id].restart == 1)
-				printf("work restart is 1 on thread %d", thr_id);
-			block_mtpProof TheBlocksAndProofs[140];
+			//			if (work_restart[thr_id].restart == 1)				
+			//				printf("work restart is 1 on thread %d", thr_id);
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
@@ -91,7 +112,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 
 			if (is_sol == 1 && !work_restart[thr_id].restart) {
-
+				gettimeofday(&tv_end, NULL);
 				uint64_t nBlockMTP[MTP_L * 2][128];
 				unsigned char nProofMTP[MTP_L * 3 * 353];
 
@@ -106,12 +127,12 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 				*hashes_done = StartNonce - first_nonce;
 				//	delete TheTree;
-				ordered_tree.~MerkleTree();
+				//				ordered_tree.~MerkleTree();
 				TheElements.clear();
 				return 0;
 				}
-
 				*/
+
 				pdata[19] = swab32(foundNonce);
 
 				/// fill mtp structure
@@ -126,19 +147,19 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 						mtp->nBlockMTP[j][i] = nBlockMTP[j][i];
 
 				memcpy(mtp->nProofMTP, nProofMTP, sizeof(unsigned char)* MTP_L * 3 * 353);
-				/////////////////
-				gettimeofday(&tv_end, NULL);
-				timeval_subtract(&timediff, &tv_end, &tv_start);
-				if (timediff.tv_usec || timediff.tv_sec) {
-					printf("timediff %f time diff %d sec %d microsec \n", foundNonce / (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
-				}
 
-				/////////////////
 				printf("found a solution thr_id %d\n", thr_id);
 				compare_height(curl, work);
 				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 				*hashes_done = foundNonce - first_nonce;
+				/////////////////
 
+				timeval_subtract(&timediff, &tv_end, &tv_start);
+				if (timediff.tv_usec || timediff.tv_sec) {
+					printf("timediff %f time diff %d sec %d microsec \n", (foundNonce - first_nonce) / (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
+				}
+
+				/////////////////
 				printf("hashes done %d thr_id %d\n", hashes_done[0], thr_id);
 				return res;
 
@@ -152,8 +173,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 	free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 	*hashes_done = StartNonce - first_nonce;
-	//	delete TheTree;
-	ordered_tree.~MerkleTree();
+
 	TheElements.clear();
 
 	return 0;
