@@ -1,3 +1,10 @@
+Work in Progress
+================
+Outstanding items as at 6 November 2018
+* Stratum pool support
+* Slow merkle tree building
+* Cannot share one memory pad for multiple threads
+
 CPUMiner-Multi
 ==============
 
