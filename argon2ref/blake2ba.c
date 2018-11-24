@@ -568,78 +568,69 @@ printf(" \n");
 	 clear_internal_memory(S->h, sizeof(S->h));
 	 return 0;
  }
-/*
- #define TRY(statement)                                                         \
-    do {                                                                       \
-        ret = statement;                                                       \
-        if (ret < 0) {                                                         \
-            goto fail;                                                         \
-        }                                                                      \
-    } while ((void)0, 0)                                                       \
-*/
- 
- int ablake2b_long(void * pout, size_t outlen, const void * in, size_t inlen)
- {
 
+
+
+/* Argon2 Team - Begin Code */
+ int ablake2b_long(void *pout, size_t outlen, const void *in, size_t inlen) {
 	 uint8_t *out = (uint8_t *)pout;
 	 ablake2b_state blake_state;
 	 uint8_t outlen_bytes[sizeof(uint32_t)] = { 0 };
 	 int ret = -1;
 
-	 if (outlen > UINT32_MAX) 
+	 if (outlen > UINT32_MAX) {
 		 goto fail;
-	 
+	 }
+
 	 /* Ensure little-endian byte order! */
 	 store32(outlen_bytes, (uint32_t)outlen);
+
+#define TRY(statement)                                                         \
+    do {                                                                       \
+        ret = statement;                                                       \
+        if (ret < 0) {                                                         \
+            goto fail;                                                         \
+        }                                                                      \
+    } while ((void)0, 0)
+
 	 if (outlen <= ablake2b_OUTBYTES) {
-
-
-		 if (ablake2b_init(&blake_state, outlen)) goto fail;
-		 if (ablake2b_update(&blake_state, outlen_bytes, sizeof(outlen_bytes))) goto fail;
-		 if (ablake2b_update(&blake_state, in, inlen)) goto fail;
-		 if (ablake2b_final(&blake_state, out, outlen)) goto fail;
+		 TRY(ablake2b_init(&blake_state, outlen));
+		 TRY(ablake2b_update(&blake_state, outlen_bytes, sizeof(outlen_bytes)));
+		 TRY(ablake2b_update(&blake_state, in, inlen));
+		 TRY(ablake2b_final(&blake_state, out, outlen));
 	 }
 	 else {
-
 		 uint32_t toproduce;
 		 uint8_t out_buffer[ablake2b_OUTBYTES];
 		 uint8_t in_buffer[ablake2b_OUTBYTES];
-		 if (ablake2b_init(&blake_state, ablake2b_OUTBYTES))  goto fail;
-		 if (ablake2b_update(&blake_state, outlen_bytes, sizeof(outlen_bytes)))  goto fail;
-		 if (ablake2b_update(&blake_state, in, inlen))  goto fail;
-		 if (ablake2b_final(&blake_state, out_buffer, ablake2b_OUTBYTES))  goto fail;
+		 TRY(ablake2b_init(&blake_state, ablake2b_OUTBYTES));
+		 TRY(ablake2b_update(&blake_state, outlen_bytes, sizeof(outlen_bytes)));
+		 TRY(ablake2b_update(&blake_state, in, inlen));
+		 TRY(ablake2b_final(&blake_state, out_buffer, ablake2b_OUTBYTES));
 		 memcpy(out, out_buffer, ablake2b_OUTBYTES / 2);
 		 out += ablake2b_OUTBYTES / 2;
 		 toproduce = (uint32_t)outlen - ablake2b_OUTBYTES / 2;
-uint32_t count = 0;
 
 		 while (toproduce > ablake2b_OUTBYTES) {
-
 			 memcpy(in_buffer, out_buffer, ablake2b_OUTBYTES);
-			 if (blake2b(out_buffer, ablake2b_OUTBYTES, in_buffer,
-				 ablake2b_OUTBYTES, NULL, 0))  goto fail;
+			 TRY(blake2b(out_buffer, ablake2b_OUTBYTES, in_buffer,
+				 ablake2b_OUTBYTES, NULL, 0));
 			 memcpy(out, out_buffer, ablake2b_OUTBYTES / 2);
 			 out += ablake2b_OUTBYTES / 2;
 			 toproduce -= ablake2b_OUTBYTES / 2;
-		 count++;
-
 		 }
 
 		 memcpy(in_buffer, out_buffer, ablake2b_OUTBYTES);
-		 if (blake2b(out_buffer, toproduce, in_buffer, ablake2b_OUTBYTES, NULL,
-			 0))  goto fail;
-
+		 TRY(blake2b(out_buffer, toproduce, in_buffer, ablake2b_OUTBYTES, NULL,
+			 0));
 		 memcpy(out, out_buffer, toproduce);
-
 	 }
  fail:
 	 clear_internal_memory(&blake_state, sizeof(blake_state));
-
-
-	 return ret;	 
+	 return ret;
+#undef TRY
  }
-
-
+ /* Argon2 Team - End Code */
 
 
 int blake2b(void *out, size_t outlen, const void *in, size_t inlen,

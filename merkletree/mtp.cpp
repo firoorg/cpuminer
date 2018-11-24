@@ -648,21 +648,21 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 
 
 
-MerkleTree::Elements mtp_init( argon2_instance_t *instance) {
+void mtp_init( argon2_instance_t *instance,MerkleTree::Elements  *elements) {
 
 	printf("Step 1 : Compute F(I) and store its T blocks X[1], X[2], ..., X[T] in the memory \n");
-	MerkleTree::Elements elements;
+//	MerkleTree::Elements elements;
 	if (instance != NULL) {
 		printf("Step 2 : Compute the root Φ of the Merkle hash tree \n");
 
 		for (long int i = 0; i < instance->memory_blocks; ++i) {
 			uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B];
 			compute_blake2b(instance->memory[i], digest);
-			elements.emplace_back(digest, digest + sizeof(digest));
+			elements->emplace_back(digest, digest + sizeof(digest));
 		}
 
 		printf("end Step 2 : Compute the root Φ of the Merkle hash tree \n");
-		return elements;
+//		return elements;
 	}
 
 }

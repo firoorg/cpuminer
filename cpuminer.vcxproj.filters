@@ -82,29 +82,11 @@
     <ClCompile Include="compat\winansi.c">
       <Filter>compat</Filter>
     </ClCompile>
-    <ClCompile Include="compat\jansson\load.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\utf.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\dump.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\hashtable.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\strbuffer.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
     <ClCompile Include="compat\gettimeofday.c">
       <Filter>compat</Filter>
     </ClCompile>
     <ClCompile Include="compat\getopt\getopt_long.c">
       <Filter>compat</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\value.c">
-      <Filter>jansson</Filter>
     </ClCompile>
     <ClCompile Include="crypto\blake2s.c">
       <Filter>crypto</Filter>
@@ -162,188 +144,176 @@
     </ClCompile>
     <ClCompile Include="api.c" />
     <ClCompile Include="sysinfos.c" />
-    <ClCompile Include="compat\jansson\error.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\memory.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\pack_unpack.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
-    <ClCompile Include="compat\jansson\strconv.c">
-      <Filter>jansson</Filter>
-    </ClCompile>
     <ClCompile Include="algo\allium.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\bastion.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\bitcore.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\blake.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\blakecoin.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\c11.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\cryptolight.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\cryptonight.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\decred.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\fresh.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\groestl.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\heavy.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\ink.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\keccak.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\jha.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\lbry.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\luffa.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\lyra2re.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\lyra2rev2.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\myr-groestl.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\neoscrypt.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="asm\neoscrypt_asm.S">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\nist5.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\pentablake.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\phi1612.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\phi2.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\quark.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\qubit.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\s3.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\scrypt.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\sha2.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\skein.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\timetravel.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\tribus.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\veltor.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x11evo.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x11.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x12.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x13.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x14.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x15.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x16r.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x16s.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\x17.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\xevan.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\pluck.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\zr5.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\skein2.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\blake2.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\drop.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\bmw256.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\axiom.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\scrypt-jane.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\sia.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\sibcoin.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\sonoa.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="algo\yescrypt.c">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="yescrypt\yescrypt-common.c">
       <Filter>yescrypt</Filter>
@@ -374,13 +344,52 @@
     </ClCompile>
     <ClCompile Include="base58.cpp" />
     <ClCompile Include="algo\mtp_algo.cpp">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </ClCompile>
     <ClCompile Include="merkletree\mtp.cpp">
       <Filter>merkletree</Filter>
     </ClCompile>
     <ClCompile Include="merkletree\merkle-tree.cpp">
       <Filter>merkletree</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\bos_deserializer.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\bos_serializer.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\dump.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\error.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\hashtable.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\hashtable_seed.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\load.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\memory.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\pack_unpack.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\strbuffer.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\strconv.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\utf.c">
+      <Filter>bos-jansson</Filter>
+    </ClCompile>
+    <ClCompile Include="compat\bos-jansson\src\value.c">
+      <Filter>bos-jansson</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -476,12 +485,6 @@
     </ClInclude>
     <ClInclude Include="uint256.h">
       <Filter>headers</Filter>
-    </ClInclude>
-    <ClInclude Include="compat\jansson\jansson.h">
-      <Filter>jansson</Filter>
-    </ClInclude>
-    <ClInclude Include="compat\jansson\config.h">
-      <Filter>jansson</Filter>
     </ClInclude>
     <ClInclude Include="crypto\blake2s.h">
       <Filter>crypto</Filter>
@@ -618,6 +621,30 @@
     <ClInclude Include="merkletree\merkle-tree.hpp">
       <Filter>merkletree</Filter>
     </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\bosjansson.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\hashtable.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\jansson_config.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\jansson_private.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\jansson_private_config.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\lookup3.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\strbuffer.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="compat\bos-jansson\src\utf.h">
+      <Filter>bos-jansson</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sph">
@@ -628,9 +655,6 @@
     </Filter>
     <Filter Include="headers">
       <UniqueIdentifier>{343fa430-44d1-4ff7-b15d-8915052fe036}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="jansson">
-      <UniqueIdentifier>{88b3057f-0bb6-49d4-98a4-551c8bd8ce0d}</UniqueIdentifier>
     </Filter>
     <Filter Include="crypto">
       <UniqueIdentifier>{d17f8918-3371-4acb-ba63-06be828562a1}</UniqueIdentifier>
@@ -650,9 +674,6 @@
     <Filter Include="scrypt-jane">
       <UniqueIdentifier>{5ed226e8-1512-481d-a88d-18644da87dcd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="algo">
-      <UniqueIdentifier>{34f266e4-b48f-4721-ac34-474b65726498}</UniqueIdentifier>
-    </Filter>
     <Filter Include="res">
       <UniqueIdentifier>{5969f6d8-98c0-49c9-8e4c-51c54b5f0e16}</UniqueIdentifier>
     </Filter>
@@ -665,13 +686,19 @@
     <Filter Include="merkletree">
       <UniqueIdentifier>{5d8b13b3-face-47f6-b3cb-a3d38d073f75}</UniqueIdentifier>
     </Filter>
+    <Filter Include="bos-jansson">
+      <UniqueIdentifier>{4b83f4b4-ee23-4ed8-8fa1-203bcce8fe42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="arch\algo">
+      <UniqueIdentifier>{34f266e4-b48f-4721-ac34-474b65726498}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="asm\scrypt-arm.S">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </None>
     <None Include="asm\sha2-arm.S">
-      <Filter>algo</Filter>
+      <Filter>arch\algo</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

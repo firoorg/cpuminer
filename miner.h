@@ -37,7 +37,8 @@
 #include <sys/time.h>
 
 #include <pthread.h>
-#include <jansson.h>
+//#include <jansson.h>
+#include <bosjansson.h>
 #include <curl/curl.h>
 
 #ifdef STDC_HEADERS
@@ -396,6 +397,7 @@ size_t address_to_script(unsigned char *out, size_t outsz, const char *addr);
 int timeval_subtract(struct timeval *result, struct timeval *x, struct timeval *y);
 bool fulltest(const uint32_t *hash, const uint32_t *target);
 void work_set_target(struct work* work, double diff);
+void work_set_target_mtp(struct work* work, uchar* target);
 double target_to_diff(uint32_t* target);
 
 double hash_target_ratio(uint32_t* hash, uint32_t* target);
@@ -455,6 +457,7 @@ struct stratum_job {
 	unsigned char nbits[4];
 	unsigned char ntime[4];
 	unsigned char extra[64]; // like lbry claimtrie
+	unsigned char ucjob_id[4];
 	bool clean;
 	double diff;
 };
@@ -472,7 +475,7 @@ struct stratum_ctx {
 
 	double next_diff;
 	double sharediff;
-
+	uchar *next_target;
 	char *session_id;
 	size_t xnonce1_size;
 	unsigned char *xnonce1;
@@ -483,16 +486,24 @@ struct stratum_ctx {
 
 	int bloc_height;
 };
-
+char *stratum_recv_line(struct stratum_ctx *sctx);
+char *stratum_recv_line_boschar(struct stratum_ctx *sctx);
 bool stratum_socket_full(struct stratum_ctx *sctx, int timeout);
 bool stratum_send_line(struct stratum_ctx *sctx, char *s);
-char *stratum_recv_line(struct stratum_ctx *sctx);
+
+json_t *stratum_recv_line_bos(struct stratum_ctx *sctx);
+bool stratum_recv_line_compact(struct stratum_ctx *sctx);
 bool stratum_connect(struct stratum_ctx *sctx, const char *url);
 void stratum_disconnect(struct stratum_ctx *sctx);
 bool stratum_subscribe(struct stratum_ctx *sctx);
+bool stratum_subscribe_bos(struct stratum_ctx *sctx);
 bool stratum_authorize(struct stratum_ctx *sctx, const char *user, const char *pass);
+bool stratum_authorize_bos(struct stratum_ctx *sctx, const char *user, const char *pass);
 bool stratum_handle_method(struct stratum_ctx *sctx, const char *s);
-
+bool stratum_handle_method_bos(struct stratum_ctx *sctx, const char *s);
+bool stratum_handle_method_bos_json(struct stratum_ctx *sctx, json_t *val);
+json_t* stratum_recv_line_c2(struct stratum_ctx *sctx);
+void check_structure(json_t *MyObject);
 /* rpc 2.0 (xmr) */
 extern bool jsonrpc_2;
 extern bool aes_ni_supported;

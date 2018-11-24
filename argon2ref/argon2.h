@@ -228,7 +228,7 @@ typedef enum Argon2_version {
     ARGON2_VERSION_NUMBER = ARGON2_VERSION_13
 } argon2_version;
 // big hack
-typedef struct block_ { uint64_t v[128]; uint64_t prev_block; uint64_t ref_block;} block;
+typedef struct block_ { uint64_t v[128];} /* uint64_t prev_block; uint64_t ref_block;}*/ block;
 typedef struct blockS_ { uint64_t v[128];} blockS;
 /*
 typedef struct block_with_offset_ {

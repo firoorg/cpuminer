@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Petri Lehtinen <petri@digip.org>
+ * Copyright (c) 2009-2016 Petri Lehtinen <petri@digip.org>
  *
  * Jansson is free software; you can redistribute it and/or modify
  * it under the terms of the MIT license. See LICENSE for details.
@@ -9,19 +9,29 @@
 #define _GNU_SOURCE
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include <jansson_private_config.h>
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
-#include "jansson.h"
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#include "bosjansson.h"
 #include "hashtable.h"
 #include "jansson_private.h"
 #include "utf.h"
 
 /* Work around nonstandard isnan() and isinf() implementations */
 #ifndef isnan
+#ifndef __sun
 static JSON_INLINE int isnan(double x) { return x != x; }
+#endif
 #endif
 #ifndef isinf
 static JSON_INLINE int isinf(double x) { return !isnan(x) && isnan(x - x); }
@@ -36,11 +46,19 @@ static JSON_INLINE void json_init(json_t *json, json_type type)
 
 /*** object ***/
 
+extern volatile uint32_t hashtable_seed;
+
 json_t *json_object(void)
 {
     json_object_t *object = jsonp_malloc(sizeof(json_object_t));
     if(!object)
         return NULL;
+
+    if (!hashtable_seed) {
+        /* Autoseed */
+        json_object_seed(0);
+    }
+
     json_init(&object->json, JSON_OBJECT);
 
     if(hashtable_init(&object->hashtable))
@@ -48,9 +66,6 @@ json_t *json_object(void)
         jsonp_free(object);
         return NULL;
     }
-
-    object->serial = 0;
-    object->visited = 0;
 
     return &object->json;
 }
@@ -76,7 +91,7 @@ json_t *json_object_get(const json_t *json, const char *key)
 {
     json_object_t *object;
 
-    if(!json_is_object(json))
+    if(!key || !json_is_object(json))
         return NULL;
 
     object = json_to_object(json);
@@ -97,7 +112,7 @@ int json_object_set_new_nocheck(json_t *json, const char *key, json_t *value)
     }
     object = json_to_object(json);
 
-    if(hashtable_set(&object->hashtable, key, object->serial++, value))
+    if(hashtable_set(&object->hashtable, key, value))
     {
         json_decref(value);
         return -1;
@@ -108,7 +123,7 @@ int json_object_set_new_nocheck(json_t *json, const char *key, json_t *value)
 
 int json_object_set_new(json_t *json, const char *key, json_t *value)
 {
-    if(!key || !utf8_check_string(key, -1))
+    if(!key || !utf8_check_string(key, strlen(key)))
     {
         json_decref(value);
         return -1;
@@ -121,7 +136,7 @@ int json_object_del(json_t *json, const char *key)
 {
     json_object_t *object;
 
-    if(!json_is_object(json))
+    if(!key || !json_is_object(json))
         return -1;
 
     object = json_to_object(json);
@@ -136,9 +151,7 @@ int json_object_clear(json_t *json)
         return -1;
 
     object = json_to_object(json);
-
     hashtable_clear(&object->hashtable);
-    object->serial = 0;
 
     return 0;
 }
@@ -243,7 +256,10 @@ json_t *json_object_iter_value(void *iter)
 int json_object_iter_set_new(json_t *json, void *iter, json_t *value)
 {
     if(!json_is_object(json) || !iter || !value)
+    {
+        json_decref(value);
         return -1;
+    }
 
     hashtable_iter_set(iter, value);
     return 0;
@@ -257,15 +273,15 @@ void *json_object_key_to_iter(const char *key)
     return hashtable_key_to_iter(key);
 }
 
-static int json_object_equal(json_t *object1, json_t *object2)
+static int json_object_equal(const json_t *object1, const json_t *object2)
 {
     const char *key;
-    json_t *value1, *value2;
+    const json_t *value1, *value2;
 
     if(json_object_size(object1) != json_object_size(object2))
         return 0;
 
-    json_object_foreach(object1, key, value1) {
+    json_object_foreach((json_t *)object1, key, value1) {
         value2 = json_object_get(object2, key);
 
         if(!json_equal(value1, value2))
@@ -335,8 +351,6 @@ json_t *json_array(void)
         jsonp_free(array);
         return NULL;
     }
-
-    array->visited = 0;
 
     return &array->json;
 }
@@ -566,7 +580,7 @@ int json_array_extend(json_t *json, json_t *other_json)
     return 0;
 }
 
-static int json_array_equal(json_t *array1, json_t *array2)
+static int json_array_equal(const json_t *array1, const json_t *array2)
 {
     size_t i, size;
 
@@ -620,33 +634,67 @@ static json_t *json_array_deep_copy(const json_t *array)
 
 /*** string ***/
 
-json_t *json_string_nocheck(const char *value)
+static json_t *string_create(const char *value, size_t len, int own)
 {
+    char *v;
     json_string_t *string;
 
     if(!value)
         return NULL;
 
-    string = jsonp_malloc(sizeof(json_string_t));
-    if(!string)
-        return NULL;
-    json_init(&string->json, JSON_STRING);
+    if(own)
+        v = (char *)value;
+    else {
+        v = jsonp_strndup(value, len);
+        if(!v)
+            return NULL;
+    }
 
-    string->value = jsonp_strdup(value);
-    if(!string->value) {
-        jsonp_free(string);
+    string = jsonp_malloc(sizeof(json_string_t));
+    if(!string) {
+        jsonp_free(v);
         return NULL;
     }
+    json_init(&string->json, JSON_STRING);
+    string->value = v;
+    string->length = len;
 
     return &string->json;
 }
 
-json_t *json_string(const char *value)
+json_t *json_string_nocheck(const char *value)
 {
-    if(!value || !utf8_check_string(value, -1))
+    if(!value)
         return NULL;
 
-    return json_string_nocheck(value);
+    return string_create(value, strlen(value), 0);
+}
+
+json_t *json_stringn_nocheck(const char *value, size_t len)
+{
+    return string_create(value, len, 0);
+}
+
+/* this is private; "steal" is not a public API concept */
+json_t *jsonp_stringn_nocheck_own(const char *value, size_t len)
+{
+    return string_create(value, len, 1);
+}
+
+json_t *json_string(const char *value)
+{
+    if(!value)
+        return NULL;
+
+    return json_stringn(value, strlen(value));
+}
+
+json_t *json_stringn(const char *value, size_t len)
+{
+    if(!value || !utf8_check_string(value, len))
+        return NULL;
+
+    return json_stringn_nocheck(value, len);
 }
 
 const char *json_string_value(const json_t *json)
@@ -657,7 +705,23 @@ const char *json_string_value(const json_t *json)
     return json_to_string(json)->value;
 }
 
+size_t json_string_length(const json_t *json)
+{
+    if(!json_is_string(json))
+        return 0;
+
+    return json_to_string(json)->length;
+}
+
 int json_string_set_nocheck(json_t *json, const char *value)
+{
+    if(!value)
+        return -1;
+
+    return json_string_setn_nocheck(json, value, strlen(value));
+}
+
+int json_string_setn_nocheck(json_t *json, const char *value, size_t len)
 {
     char *dup;
     json_string_t *string;
@@ -665,23 +729,32 @@ int json_string_set_nocheck(json_t *json, const char *value)
     if(!json_is_string(json) || !value)
         return -1;
 
-    dup = jsonp_strdup(value);
+    dup = jsonp_strndup(value, len);
     if(!dup)
         return -1;
 
     string = json_to_string(json);
     jsonp_free(string->value);
     string->value = dup;
+    string->length = len;
 
     return 0;
 }
 
 int json_string_set(json_t *json, const char *value)
 {
-    if(!value || !utf8_check_string(value, -1))
+    if(!value)
         return -1;
 
-    return json_string_set_nocheck(json, value);
+    return json_string_setn(json, value, strlen(value));
+}
+
+int json_string_setn(json_t *json, const char *value, size_t len)
+{
+    if(!value || !utf8_check_string(value, len))
+        return -1;
+
+    return json_string_setn_nocheck(json, value, len);
 }
 
 static void json_delete_string(json_string_t *string)
@@ -690,14 +763,62 @@ static void json_delete_string(json_string_t *string)
     jsonp_free(string);
 }
 
-static int json_string_equal(json_t *string1, json_t *string2)
+static int json_string_equal(const json_t *string1, const json_t *string2)
 {
-    return strcmp(json_string_value(string1), json_string_value(string2)) == 0;
+    json_string_t *s1, *s2;
+
+    s1 = json_to_string(string1);
+    s2 = json_to_string(string2);
+    return s1->length == s2->length && !memcmp(s1->value, s2->value, s1->length);
 }
 
 static json_t *json_string_copy(const json_t *string)
 {
-    return json_string_nocheck(json_string_value(string));
+    json_string_t *s;
+
+    s = json_to_string(string);
+    return json_stringn_nocheck(s->value, s->length);
+}
+
+json_t *json_vsprintf(const char *fmt, va_list ap) {
+    json_t *json = NULL;
+    int length;
+    char *buf;
+    va_list aq;
+    va_copy(aq, ap);
+
+    length = vsnprintf(NULL, 0, fmt, ap);
+    if (length == 0) {
+        json = json_string("");
+        goto out;
+    }
+
+    buf = jsonp_malloc(length + 1);
+    if (!buf)
+        goto out;
+
+    vsnprintf(buf, length + 1, fmt, aq);
+    if (!utf8_check_string(buf, length)) {
+        jsonp_free(buf);
+        goto out;
+    }
+
+    json = jsonp_stringn_nocheck_own(buf, length);
+
+out:
+    va_end(aq);
+    return json;
+}
+
+json_t *json_sprintf(const char *fmt, ...) {
+    json_t *result;
+    va_list ap;
+
+    va_start(ap, fmt);
+    result = json_vsprintf(fmt, ap);
+    va_end(ap);
+
+    return result;
 }
 
 
@@ -737,7 +858,7 @@ static void json_delete_integer(json_integer_t *integer)
     jsonp_free(integer);
 }
 
-static int json_integer_equal(json_t *integer1, json_t *integer2)
+static int json_integer_equal(const json_t *integer1, const json_t *integer2)
 {
     return json_integer_value(integer1) == json_integer_value(integer2);
 }
@@ -789,7 +910,7 @@ static void json_delete_real(json_real_t *real)
     jsonp_free(real);
 }
 
-static int json_real_equal(json_t *real1, json_t *real2)
+static int json_real_equal(const json_t *real1, const json_t *real2)
 {
     return json_real_value(real1) == json_real_value(real2);
 }
@@ -810,6 +931,79 @@ double json_number_value(const json_t *json)
         return json_real_value(json);
     else
         return 0.0;
+}
+
+/*** bytes ***/
+
+json_t *json_bytes(void *value, size_t size)
+{
+    json_bytes_t *bytes = jsonp_malloc(sizeof(json_bytes_t));
+    if(!bytes)
+        return NULL;
+    json_init(&bytes->json, JSON_BYTES);
+
+    bytes->value = value;
+    bytes->size = size;
+    return &bytes->json;
+}
+
+const void *json_bytes_value(const json_t *json)
+{
+    if(!json_is_bytes(json))
+        return 0;
+
+    return json_to_bytes(json)->value;
+}
+
+size_t json_bytes_size(const json_t *json)
+{
+    if(!json_is_bytes(json))
+        return 0;
+
+    return json_to_bytes(json)->size;
+}
+
+int json_bytes_set(json_t *json, void *value, size_t size)
+{
+    if(!json_is_bytes(json))
+        return -1;
+
+    json_to_bytes(json)->value = value;
+    json_to_bytes(json)->size = size;
+
+    return 0;
+}
+
+static void json_delete_bytes(json_bytes_t *bytes)
+{
+    jsonp_free(bytes->value);
+    jsonp_free(bytes);
+}
+
+static int json_bytes_equal(const json_t *bytes1, const json_t *bytes2)
+{
+    size_t size = json_bytes_size(bytes1);
+    const void *ptr1 = json_bytes_value(bytes1);
+    const void *ptr2 = json_bytes_value(bytes2);
+
+    if (size != json_bytes_size(bytes2))
+        return 0;
+
+    return memcmp(ptr1, ptr2, size) == 0;
+}
+
+static json_t *json_bytes_copy(const json_t *json)
+{
+    json_t *result;
+    json_bytes_t *bytes = json_to_bytes(json);
+    void *value = jsonp_malloc(bytes->size);
+
+    memcpy(value, bytes->value, bytes->size);
+    result = json_bytes(value, bytes->size);
+    if(!result)
+        return NULL;
+
+    return result;
 }
 
 
@@ -840,20 +1034,31 @@ json_t *json_null(void)
 
 void json_delete(json_t *json)
 {
-    if(json_is_object(json))
-        json_delete_object(json_to_object(json));
+    if (!json)
+        return;
 
-    else if(json_is_array(json))
-        json_delete_array(json_to_array(json));
-
-    else if(json_is_string(json))
-        json_delete_string(json_to_string(json));
-
-    else if(json_is_integer(json))
-        json_delete_integer(json_to_integer(json));
-
-    else if(json_is_real(json))
-        json_delete_real(json_to_real(json));
+    switch(json_typeof(json)) {
+        case JSON_OBJECT:
+            json_delete_object(json_to_object(json));
+            break;
+        case JSON_ARRAY:
+            json_delete_array(json_to_array(json));
+            break;
+        case JSON_STRING:
+            json_delete_string(json_to_string(json));
+            break;
+        case JSON_INTEGER:
+            json_delete_integer(json_to_integer(json));
+            break;
+        case JSON_REAL:
+            json_delete_real(json_to_real(json));
+            break;
+        case JSON_BYTES:
+            json_delete_bytes(json_to_bytes(json));
+            break;
+        default:
+            return;
+    }
 
     /* json_delete is not called for true, false or null */
 }
@@ -861,7 +1066,7 @@ void json_delete(json_t *json)
 
 /*** equality ***/
 
-int json_equal(json_t *json1, json_t *json2)
+int json_equal(const json_t *json1, const json_t *json2)
 {
     if(!json1 || !json2)
         return 0;
@@ -873,22 +1078,22 @@ int json_equal(json_t *json1, json_t *json2)
     if(json1 == json2)
         return 1;
 
-    if(json_is_object(json1))
-        return json_object_equal(json1, json2);
-
-    if(json_is_array(json1))
-        return json_array_equal(json1, json2);
-
-    if(json_is_string(json1))
-        return json_string_equal(json1, json2);
-
-    if(json_is_integer(json1))
-        return json_integer_equal(json1, json2);
-
-    if(json_is_real(json1))
-        return json_real_equal(json1, json2);
-
-    return 0;
+    switch(json_typeof(json1)) {
+        case JSON_OBJECT:
+            return json_object_equal(json1, json2);
+        case JSON_ARRAY:
+            return json_array_equal(json1, json2);
+        case JSON_STRING:
+            return json_string_equal(json1, json2);
+        case JSON_INTEGER:
+            return json_integer_equal(json1, json2);
+        case JSON_REAL:
+            return json_real_equal(json1, json2);
+        case JSON_BYTES:
+            return json_bytes_equal(json1, json2);
+        default:
+            return 0;
+    }
 }
 
 
@@ -899,25 +1104,26 @@ json_t *json_copy(json_t *json)
     if(!json)
         return NULL;
 
-    if(json_is_object(json))
-        return json_object_copy(json);
-
-    if(json_is_array(json))
-        return json_array_copy(json);
-
-    if(json_is_string(json))
-        return json_string_copy(json);
-
-    if(json_is_integer(json))
-        return json_integer_copy(json);
-
-    if(json_is_real(json))
-        return json_real_copy(json);
-
-    if(json_is_true(json) || json_is_false(json) || json_is_null(json))
-        return json;
-
-    return NULL;
+    switch(json_typeof(json)) {
+        case JSON_OBJECT:
+            return json_object_copy(json);
+        case JSON_ARRAY:
+            return json_array_copy(json);
+        case JSON_STRING:
+            return json_string_copy(json);
+        case JSON_INTEGER:
+            return json_integer_copy(json);
+        case JSON_REAL:
+            return json_real_copy(json);
+        case JSON_BYTES:
+            return json_bytes_copy(json);
+        case JSON_TRUE:
+        case JSON_FALSE:
+        case JSON_NULL:
+            return json;
+        default:
+            return NULL;
+    }
 }
 
 json_t *json_deep_copy(const json_t *json)
@@ -925,26 +1131,26 @@ json_t *json_deep_copy(const json_t *json)
     if(!json)
         return NULL;
 
-    if(json_is_object(json))
-        return json_object_deep_copy(json);
-
-    if(json_is_array(json))
-        return json_array_deep_copy(json);
-
-    /* for the rest of the types, deep copying doesn't differ from
-       shallow copying */
-
-    if(json_is_string(json))
-        return json_string_copy(json);
-
-    if(json_is_integer(json))
-        return json_integer_copy(json);
-
-    if(json_is_real(json))
-        return json_real_copy(json);
-
-    if(json_is_true(json) || json_is_false(json) || json_is_null(json))
-        return (json_t *)json;
-
-    return NULL;
+    switch(json_typeof(json)) {
+        case JSON_OBJECT:
+            return json_object_deep_copy(json);
+        case JSON_ARRAY:
+            return json_array_deep_copy(json);
+            /* for the rest of the types, deep copying doesn't differ from
+               shallow copying */
+        case JSON_STRING:
+            return json_string_copy(json);
+        case JSON_INTEGER:
+            return json_integer_copy(json);
+        case JSON_REAL:
+            return json_real_copy(json);
+        case JSON_BYTES:
+            return json_bytes_copy(json);
+        case JSON_TRUE:
+        case JSON_FALSE:
+        case JSON_NULL:
+            return (json_t *)json;
+        default:
+            return NULL;
+    }
 }

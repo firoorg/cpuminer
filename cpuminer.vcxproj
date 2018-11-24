@@ -144,18 +144,24 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <CompileAsManaged>false</CompileAsManaged>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;SCRYPT_KECCAK512;SCRYPT_CHACHA;SCRYPT_CHOOSE_COMPILETIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;compat;compat\curl-for-windows\curl\include;compat\jansson;compat\getopt;compat\pthreads;compat\curl-for-windows\openssl\openssl\include;compat\curl-for-windows\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;SCRYPT_KECCAK512;SCRYPT_CHACHA;SCRYPT_CHOOSE_COMPILETIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.;compat;compat\curl-for-windows\curl\include;compat\getopt;compat\bos-jansson\src;compat\pthreads;compat\curl-for-windows\openssl\openssl\include;compat\curl-for-windows\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <CompileAs>Default</CompileAs>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -166,11 +172,13 @@
       <AdditionalLibraryDirectories>compat\pthreads\x64;compat\curl-for-windows\out\x64\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
       <LinkStatus>false</LinkStatus>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <FixedBaseAddress>
+      </FixedBaseAddress>
       <HeapReserveSize>100000000</HeapReserveSize>
       <StackReserveSize>100000000</StackReserveSize>
-      <LargeAddressAware>true</LargeAddressAware>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -182,18 +190,21 @@
     <ClCompile Include="argon2ref\ref.c" />
     <ClCompile Include="argon2ref\thread.c" />
     <ClCompile Include="base58.cpp" />
+    <ClCompile Include="compat\bos-jansson\src\bos_deserializer.c" />
+    <ClCompile Include="compat\bos-jansson\src\bos_serializer.c" />
+    <ClCompile Include="compat\bos-jansson\src\dump.c" />
+    <ClCompile Include="compat\bos-jansson\src\error.c" />
+    <ClCompile Include="compat\bos-jansson\src\hashtable.c" />
+    <ClCompile Include="compat\bos-jansson\src\hashtable_seed.c" />
+    <ClCompile Include="compat\bos-jansson\src\load.c" />
+    <ClCompile Include="compat\bos-jansson\src\memory.c" />
+    <ClCompile Include="compat\bos-jansson\src\pack_unpack.c" />
+    <ClCompile Include="compat\bos-jansson\src\strbuffer.c" />
+    <ClCompile Include="compat\bos-jansson\src\strconv.c" />
+    <ClCompile Include="compat\bos-jansson\src\utf.c" />
+    <ClCompile Include="compat\bos-jansson\src\value.c" />
     <ClCompile Include="compat\getopt\getopt_long.c" />
     <ClCompile Include="compat\gettimeofday.c" />
-    <ClCompile Include="compat\jansson\dump.c" />
-    <ClCompile Include="compat\jansson\error.c" />
-    <ClCompile Include="compat\jansson\hashtable.c" />
-    <ClCompile Include="compat\jansson\load.c" />
-    <ClCompile Include="compat\jansson\memory.c" />
-    <ClCompile Include="compat\jansson\pack_unpack.c" />
-    <ClCompile Include="compat\jansson\strbuffer.c" />
-    <ClCompile Include="compat\jansson\strconv.c" />
-    <ClCompile Include="compat\jansson\utf.c" />
-    <ClCompile Include="compat\jansson\value.c" />
     <ClCompile Include="compat\winansi.c" />
     <ClCompile Include="cpu-miner.c">
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
@@ -321,9 +332,15 @@
     <ClInclude Include="argon2ref\core.h" />
     <ClInclude Include="argon2ref\encoding.h" />
     <ClInclude Include="argon2ref\thread.h" />
-    <ClInclude Include="compat\jansson\config.h" />
-    <ClInclude Include="compat\jansson\jansson.h" />
     <ClInclude Include="compat.h" />
+    <ClInclude Include="compat\bos-jansson\src\bosjansson.h" />
+    <ClInclude Include="compat\bos-jansson\src\hashtable.h" />
+    <ClInclude Include="compat\bos-jansson\src\jansson_config.h" />
+    <ClInclude Include="compat\bos-jansson\src\jansson_private.h" />
+    <ClInclude Include="compat\bos-jansson\src\jansson_private_config.h" />
+    <ClInclude Include="compat\bos-jansson\src\lookup3.h" />
+    <ClInclude Include="compat\bos-jansson\src\strbuffer.h" />
+    <ClInclude Include="compat\bos-jansson\src\utf.h" />
     <ClInclude Include="compat\getopt\getopt.h" />
     <ClInclude Include="compat\inttypes.h" />
     <ClInclude Include="compat\stdbool.h" />

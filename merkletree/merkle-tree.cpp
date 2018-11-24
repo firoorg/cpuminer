@@ -267,22 +267,6 @@ bool MerkleTree::getPair(const Elements& layer, size_t index, Buffer& pair)
     return true;
 }
 
-void  MerkleTree::elementsToFormatHex(const Elements& elements, char* TheChar)
-{
-
-	int TheIt = 0;
-	for (MerkleTree::Elements::const_iterator it = elements.begin();
-		it != elements.end();
-		++it) {
-		std::vector<uint8_t> Truc = *it;
-		for (int i = 0; i< Truc.size(); i++) {
-			unsigned char TheUchar = Truc[i];
-			sprintf(&TheChar[2 * TheIt], "%02x", TheUchar);
-//			printf(" %02x ", TheUchar);
-			TheIt++;
-		}
-	}
-}
 
 std::string MerkleTree::elementsToHex(const Elements& elements)
 {

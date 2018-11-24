@@ -245,8 +245,7 @@ private :
 
     /** Converts a list of hashes into a hexadecimal string */
     static std::string elementsToHex(const Elements& elements);
-	/** Converts a list of hashes into a formated hexadecimal string */
-	void  elementsToFormatHex(const Elements& elements, char* TheChar);
+
 };
 
 #endif // MERKLE_TREE_HPP_

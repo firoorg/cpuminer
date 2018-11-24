@@ -47,15 +47,22 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 	uint32_t StartNonce = ((uint32_t*)pdata)[19];
 	uint32_t _ALIGN(128) endiandata[20];
-	((uint32_t*)pdata)[19] = 0x00100000; // mtp version not the actual nonce
-	for (int k = 0; k < 20; k++)
-		be32enc(&endiandata[k], pdata[k]);
-
+//	0x00100000
+	((uint32_t*)pdata)[19] = pdata[20]; //    0x00100000; // mtp version not the actual nonce
+//	for (int k = 0; k < 20; k++)
+//		be32enc(&endiandata[k], pdata[k]);
+	for (int k = 0; k < 21; k++)
+		endiandata[k] = pdata[k];
+//	for (int k = 0; k < 21; k++)
+//	printf("k=%d data %08x\n",k, (endiandata[k]));// = pdata[k];
 	if (work_restart[thr_id].restart == 1)
 		return 0;
 
 
 	//	((uint32_t*)pdata)[19] = 0;
+
+	gettimeofday(&tv_start, NULL);
+
 	argon2_context context = init_argon2d_param((const char*)endiandata);
 	argon2_instance_t instance;
 	argon2_ctx_from_mtp(&context, &instance);
@@ -63,7 +70,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 		return 0;
 	}
-	TheElements = mtp_init(&instance);
+	mtp_init(&instance,&TheElements);
 	if (work_restart[thr_id].restart == 1) {
 		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 		return 0;
@@ -83,11 +90,14 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 		return 0;
 	}
+					gettimeofday(&tv_end, NULL);
 
-
+	timeval_subtract(&timediff, &tv_end, &tv_start);
+	if (timediff.tv_usec || timediff.tv_sec) {
+		printf("timediff %f time diff %d sec %d microsec \n",  (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
+	}
 
 	gettimeofday(&tv_start, NULL);
-
 	uint32_t throughput = 1;
 	uint32_t foundNonce = StartNonce /*- first_nonce*/;
 	printf("first nonce %08x thread id %d \n", foundNonce, thr_id);
@@ -133,7 +143,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 				}
 				*/
 
-				pdata[19] = swab32(foundNonce);
+				pdata[19] = foundNonce;
 
 				/// fill mtp structure
 				mtp->MTPVersion = 0x1000;
@@ -149,7 +159,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 				memcpy(mtp->nProofMTP, nProofMTP, sizeof(unsigned char)* MTP_L * 3 * 353);
 
 				printf("found a solution thr_id %d\n", thr_id);
-				compare_height(curl, work);
+//				compare_height(curl, work);
 				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 				*hashes_done = foundNonce - first_nonce;
 				/////////////////
