@@ -437,7 +437,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev'
+ac_pwd='/mnt/c/Users/djm34/Documents/GitHub/cpuminer'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -691,12 +691,12 @@ S["mkdir_p"]="$(MKDIR_P)"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev/install-sh"
-S["MAKEINFO"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev/missing makeinfo"
-S["AUTOHEADER"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev/missing autoheader"
-S["AUTOMAKE"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev/missing automake-1.15"
-S["AUTOCONF"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev/missing autoconf"
-S["ACLOCAL"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer-dev/missing aclocal-1.15"
+S["install_sh"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer/install-sh"
+S["MAKEINFO"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer/missing makeinfo"
+S["AUTOHEADER"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer/missing autoheader"
+S["AUTOMAKE"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer/missing automake-1.15"
+S["AUTOCONF"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer/missing autoconf"
+S["ACLOCAL"]="${SHELL} /mnt/c/Users/djm34/Documents/GitHub/cpuminer/missing aclocal-1.15"
 S["VERSION"]="1.3.5"
 S["PACKAGE"]="cpuminer-multi"
 S["CYGPATH_W"]="echo"
