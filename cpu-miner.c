@@ -1866,21 +1866,6 @@ static bool submit_upstream_work_mtp(CURL *curl, struct work *work, struct mtp *
 				le32enc(&ntime, work->data[17]);
 				le32enc(&nonce, work->data[19]);
 			}
-
-			bin2hex(ntimestr, (const unsigned char *)(&ntime), 4);
-			bin2hex(noncestr, (const unsigned char *)(&nonce), 4);
-			if (opt_algo == ALGO_DECRED) {
-				xnonce2str = abin2hex((unsigned char*)(&work->data[36]), stratum.xnonce1_size);
-			}
-			else if (opt_algo == ALGO_SIA) {
-				uint16_t high_nonce = swab32(work->data[9]) >> 16;
-				xnonce2str = abin2hex((unsigned char*)(&high_nonce), 2);
-			}
-			else {
-				xnonce2str = abin2hex(work->xnonce2, work->xnonce2_len);
-			}
-
-			free(xnonce2str);
 		
 			json_t *MyObject = json_object();
 			json_t *json_arr = json_array();
@@ -1904,7 +1889,7 @@ static bool submit_upstream_work_mtp(CURL *curl, struct work *work, struct mtp *
 			json_bytes_set(Truc,(uchar*)&ntime, sizeof(uint32_t));
 			json_array_append(json_arr, Truc);
 			Truc = json_bytes(0, 0);
-			json_bytes_set(Truc, (uchar*)&work->data[19], sizeof(uint32_t));
+			json_bytes_set(Truc, (uchar*)&nonce, sizeof(uint32_t));
 			json_array_append(json_arr, Truc);
 			Truc = json_bytes(0, 0);
 			json_bytes_set(Truc, mtp->MerkleRoot, SizeMerkleRoot);
@@ -3647,11 +3632,14 @@ static void *stratum_thread(void *userdata)
 				
 				json_t *s2;
 				s2 = stratum_recv_line_c2(&stratum);
+
+
 				if ( json_object_size(s2)==0) {
 					stratum_disconnect(&stratum);
 					applog(LOG_ERR, "Stratum connection interrupted");
 					continue;
 				}
+
 				if (!stratum_handle_method_bos_json(&stratum, s2))
 					stratum_handle_response_json(s2);
 				json_decref(s2);
@@ -4500,7 +4488,7 @@ int main(int argc, char *argv[]) {
 		if (have_stratum)
 			tq_push(thr_info[stratum_thr_id].q, strdup(rpc_url));
 	}
-
+	
 	if (opt_api_listen) {
 		/* api thread */
 		api_thr_id = opt_n_threads + 3;

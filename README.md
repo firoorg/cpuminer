@@ -1,9 +1,3 @@
-Work in Progress
-================
-Outstanding items as at 28 November 2018
-* Slow merkle tree building
-* Cannot share one memory pad for multiple threads
-
 CPUMiner-Multi
 ==============
 

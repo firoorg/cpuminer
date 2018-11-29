@@ -1,6 +1,6 @@
 
 if WANT_JANSSON
-JANSSON_INCLUDES= -I$(top_srcdir)/compat/jansson
+JANSSON_INCLUDES= -I$(top_srcdir)/compat/bos-jansson
 else
 JANSSON_INCLUDES=
 endif
@@ -144,7 +144,7 @@ if HAVE_WINDOWS
    cpuminer_SOURCES += compat/winansi.c
 endif
 
-cpuminer_LDFLAGS	= @LDFLAGS@
+cpuminer_LDFLAGS	= @LDFLAGS@ 
 cpuminer_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
 cpuminer_CPPFLAGS =  -fno-strict-aliasing -std=gnu++11 @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)
 cpuminer_CFLAGS   = -Wno-pointer-sign -Wno-pointer-to-int-cast $(disable_flags)

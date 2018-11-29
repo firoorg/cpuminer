@@ -1,0 +1,4 @@
+asm/cpuminer-neoscrypt_asm.o: asm/neoscrypt_asm.S \
+ /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:

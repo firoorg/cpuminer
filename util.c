@@ -1024,8 +1024,7 @@ static bool send_line_bos(curl_socket_t sock, bos_t *s2)
 	int len;
 	char* s;
 	s = (char*)s2->data;
-	len = /*(int)strlen(s);*/ s2->size;
-//	s[len++] = '\n';
+	len = s2->size;
 
 	while (len > 0) {
 		struct timeval timeout = { 0, 0 };
@@ -1381,7 +1380,6 @@ out:
 	return MyObject;
 }
 
-
 char *stratum_recv_line_boschar(struct stratum_ctx *sctx)
 {
 
@@ -1497,7 +1495,6 @@ out:
 	return json_dumps(MyObject,0);
 }
 
-
 bool stratum_recv_line_compact(struct stratum_ctx *sctx)
 {
 	json_t *MyObject2 = json_object();
@@ -1563,7 +1560,6 @@ out:
 	return isok;//json_dumps(MyObject, 0);
 }
 
-
 json_t* stratum_recv_line_c2(struct stratum_ctx *sctx)
 {
 
@@ -1606,13 +1602,11 @@ json_t* stratum_recv_line_c2(struct stratum_ctx *sctx)
 				json_t *MyObject2 = json_object();
 				MyObject2 = bos_deserialize(s + bossize, boserror);
 				bossize += bos_sizeof(s + bossize);
-
 				MyObject = recode_message(MyObject2);
 				isok = stratum_handle_method_bos_json(sctx, MyObject);
 				json_decref(MyObject2);
 				if (bossize != n) 
 					json_decref(MyObject);
-
 			} while (bossize != n);
 			free(boserror);
 			goto out;
@@ -1629,6 +1623,7 @@ out:
 
 	//	if (sret && opt_protocol)
 	//		applog(LOG_DEBUG, "< %s", sret);
+	
 	return MyObject;//json_dumps(MyObject, 0);
 }
 
@@ -1837,7 +1832,6 @@ out:
 	return false;
 }
 
-
 bool stratum_subscribe(struct stratum_ctx *sctx)
 {
 	char *s, *sret = NULL;
@@ -1932,7 +1926,6 @@ out:
 	return ret;
 }
 
-
 bool stratum_subscribe_bos(struct stratum_ctx *sctx)
 {
 	char *s, *sret = NULL;
@@ -1971,13 +1964,9 @@ start:
 		goto out;
 	}
 
-	sret = stratum_recv_line_bos(sctx);
-	if (!sret)
-		goto out;
+	val = stratum_recv_line_bos(sctx);
 
-	val = sret;
-
-	if (!val) {
+	if (json_object_size(val)==0) {
 		applog(LOG_ERR, "JSON decode failed(%d): %s", err.line, err.text);
 		goto out;
 	}
@@ -2016,10 +2005,10 @@ start:
 	
 out:
 //	free(s);
-//	if (val)
-//		json_decref(val);
+	if (val)
+		json_decref(val);
 	if (!ret) {
-		if (sret && !retry) {
+		if (json_object_size(val) == 0 && !retry) {
 			retry = true;
 			goto start;
 		}
@@ -2027,11 +2016,7 @@ out:
 	return ret;
 }
 
- 
-
 extern bool opt_extranonce;
-
-
 
 bool stratum_authorize_bos(struct stratum_ctx *sctx, const char *user, const char *pass)
 {
@@ -2090,8 +2075,6 @@ out:
 		json_decref(val);
 	return ret;
 }
-
-
 
 bool stratum_authorize(struct stratum_ctx *sctx, const char *user, const char *pass)
 {
@@ -2529,7 +2512,6 @@ static bool stratum_notify(struct stratum_ctx *sctx, json_t *params)
 out:
 	return ret;
 }
-
 
 static bool stratum_notify_bos(struct stratum_ctx *sctx, json_t *params)
 {
@@ -3223,8 +3205,8 @@ bool stratum_handle_method_bos_json(struct stratum_ctx *sctx, json_t *val)
 	}
 
 out:
-	if (val)
-		json_decref(val);
+//	if (val)
+//		json_decref(val);
 
 	return ret;
 }

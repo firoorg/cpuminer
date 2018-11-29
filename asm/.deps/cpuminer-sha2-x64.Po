@@ -1,0 +1,6 @@
+asm/cpuminer-sha2-x64.o: asm/sha2-x64.S /usr/include/stdc-predef.h \
+ cpuminer-config.h
+
+/usr/include/stdc-predef.h:
+
+cpuminer-config.h:

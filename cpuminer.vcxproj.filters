@@ -352,43 +352,43 @@
     <ClCompile Include="merkletree\merkle-tree.cpp">
       <Filter>merkletree</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\bos_deserializer.c">
+    <ClCompile Include="compat\bos-jansson\bos_deserializer.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\bos_serializer.c">
+    <ClCompile Include="compat\bos-jansson\bos_serializer.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\dump.c">
+    <ClCompile Include="compat\bos-jansson\dump.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\error.c">
+    <ClCompile Include="compat\bos-jansson\error.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\hashtable.c">
+    <ClCompile Include="compat\bos-jansson\hashtable.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\hashtable_seed.c">
+    <ClCompile Include="compat\bos-jansson\hashtable_seed.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\load.c">
+    <ClCompile Include="compat\bos-jansson\load.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\memory.c">
+    <ClCompile Include="compat\bos-jansson\memory.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\pack_unpack.c">
+    <ClCompile Include="compat\bos-jansson\pack_unpack.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\strbuffer.c">
+    <ClCompile Include="compat\bos-jansson\strbuffer.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\strconv.c">
+    <ClCompile Include="compat\bos-jansson\strconv.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\utf.c">
+    <ClCompile Include="compat\bos-jansson\utf.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
-    <ClCompile Include="compat\bos-jansson\src\value.c">
+    <ClCompile Include="compat\bos-jansson\value.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
   </ItemGroup>
@@ -621,28 +621,28 @@
     <ClInclude Include="merkletree\merkle-tree.hpp">
       <Filter>merkletree</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\bosjansson.h">
+    <ClInclude Include="compat\bos-jansson\bosjansson.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\hashtable.h">
+    <ClInclude Include="compat\bos-jansson\hashtable.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\jansson_config.h">
+    <ClInclude Include="compat\bos-jansson\jansson_config.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\jansson_private.h">
+    <ClInclude Include="compat\bos-jansson\jansson_private.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\jansson_private_config.h">
+    <ClInclude Include="compat\bos-jansson\jansson_private_config.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\lookup3.h">
+    <ClInclude Include="compat\bos-jansson\lookup3.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\strbuffer.h">
+    <ClInclude Include="compat\bos-jansson\strbuffer.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
-    <ClInclude Include="compat\bos-jansson\src\utf.h">
+    <ClInclude Include="compat\bos-jansson\utf.h">
       <Filter>bos-jansson</Filter>
     </ClInclude>
   </ItemGroup>

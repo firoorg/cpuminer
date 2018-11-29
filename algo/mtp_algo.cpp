@@ -46,13 +46,13 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 	uint32_t TheNonce;
 
 	uint32_t StartNonce = ((uint32_t*)pdata)[19];
-	uint32_t _ALIGN(128) endiandata[20];
+	uint32_t _ALIGN(128) endiandata[21];
 //	0x00100000
 	((uint32_t*)pdata)[19] = pdata[20]; //    0x00100000; // mtp version not the actual nonce
 //	for (int k = 0; k < 20; k++)
 //		be32enc(&endiandata[k], pdata[k]);
-	for (int k = 0; k < 21; k++)
-		endiandata[k] = pdata[k];
+	for (int k = 0; k < 21; k++) {
+		endiandata[k] = pdata[k];}
 //	for (int k = 0; k < 21; k++)
 //	printf("k=%d data %08x\n",k, (endiandata[k]));// = pdata[k];
 	if (work_restart[thr_id].restart == 1)
