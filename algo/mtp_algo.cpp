@@ -33,7 +33,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 	unsigned char TheMerkleRoot[16];
 	unsigned char mtpHashValue[32];
 
-	MerkleTree::Elements TheElements; // = new MerkleTree;
+	//MerkleTree::Elements TheElements; // = new MerkleTree;
 
 	uint32_t *pdata = work->data;
 	uint32_t *ptarget = work->target;
@@ -42,11 +42,11 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 	//	if (opt_benchmark)
 	//		ptarget[7] = 0x00ff;
 
-	uint32_t diff = 5;
+
 	uint32_t TheNonce;
 
 	uint32_t StartNonce = ((uint32_t*)pdata)[19];
-	uint32_t _ALIGN(128) endiandata[21];
+	uint32_t _ALIGN(128) endiandata[32];
 //	0x00100000
 	((uint32_t*)pdata)[19] = pdata[20]; //    0x00100000; // mtp version not the actual nonce
 //	for (int k = 0; k < 20; k++)
@@ -70,7 +70,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 		return 0;
 	}
-	mtp_init(&instance,&TheElements);
+	MerkleTree::Elements TheElements = mtp_init2(&instance); //,&TheElements);
 	if (work_restart[thr_id].restart == 1) {
 		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 		return 0;
@@ -131,17 +131,6 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 				int res = 1;
 				//	work_set_target_ratio(work, vhash64);		
 				printf("work restart status %d threadId %d\n", work_restart[thr_id].restart, thr_id);
-				/*
-				if (!compare_height(curl,work))
-				{
-				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-				*hashes_done = StartNonce - first_nonce;
-				//	delete TheTree;
-				//				ordered_tree.~MerkleTree();
-				TheElements.clear();
-				return 0;
-				}
-				*/
 
 				pdata[19] = foundNonce;
 

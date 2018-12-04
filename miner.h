@@ -490,6 +490,7 @@ char *stratum_recv_line(struct stratum_ctx *sctx);
 char *stratum_recv_line_boschar(struct stratum_ctx *sctx);
 bool stratum_socket_full(struct stratum_ctx *sctx, int timeout);
 bool stratum_send_line(struct stratum_ctx *sctx, char *s);
+bool stratum_send_line_bos(struct stratum_ctx *sctx, bos_t *s);
 
 json_t *stratum_recv_line_bos(struct stratum_ctx *sctx);
 bool stratum_recv_line_compact(struct stratum_ctx *sctx);
