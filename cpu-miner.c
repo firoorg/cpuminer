@@ -1909,7 +1909,7 @@ static bool submit_upstream_work_mtp(CURL *curl, struct work *work, struct mtp *
 
 		stratum.sharediff = work->sharediff;
 
-		if (unlikely(!stratum_send_line_bos(&stratum, serialized))) {
+		if (stratum_send_line_bos(&stratum, serialized)==0) {
 			applog(LOG_ERR, "submit_upstream_work stratum_send_line failed");
 			goto out;
 		}
