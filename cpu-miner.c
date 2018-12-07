@@ -3251,7 +3251,7 @@ printf("nonce getting reset\n");
 	}
 
 out:
-	free(mtp);
+//	free(mtp);
 	tq_freeze(mythr->q);
 
 	return NULL;
