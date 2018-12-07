@@ -12,7 +12,7 @@ extern "C"
 }
 #endif
 
-
+#define MAXCPU 32
 
 #define memcost 4*1024*1024
 
@@ -20,8 +20,13 @@ extern "C"
 #define SALTLEN 16
 #define PWD "password"
 
-
-
+static uint32_t JobId[MAXCPU] = {0};
+static  MerkleTree::Elements TheElements[MAXCPU];
+static MerkleTree ordered_tree[MAXCPU];
+static  unsigned char TheMerkleRoot[MAXCPU][16];
+static  argon2_context context[MAXCPU];
+static  argon2_instance_t instance[MAXCPU];
+static  MerkleTree::Buffer root[MAXCPU];
 int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp)
 {
 
@@ -30,7 +35,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 	//	compare_height(curl,work);
 
 	struct timeval tv_start, tv_end, timediff;
-	unsigned char TheMerkleRoot[16];
+//	unsigned char TheMerkleRoot[16];
 	unsigned char mtpHashValue[32];
 
 	//MerkleTree::Elements TheElements; // = new MerkleTree;
@@ -38,7 +43,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 	uint32_t *pdata = work->data;
 	uint32_t *ptarget = work->target;
 	const uint32_t first_nonce = pdata[19];
-
+printf("the first nonce %08x \n",first_nonce);
 	//	if (opt_benchmark)
 	//		ptarget[7] = 0x00ff;
 
@@ -53,55 +58,62 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 //		be32enc(&endiandata[k], pdata[k]);
 	for (int k = 0; k < 21; k++) {
 		endiandata[k] = pdata[k];}
+	pdata[19] = first_nonce;
 //	for (int k = 0; k < 21; k++)
 //	printf("k=%d data %08x\n",k, (endiandata[k]));// = pdata[k];
 	if (work_restart[thr_id].restart == 1)
 		return 0;
 
-
+	
 	//	((uint32_t*)pdata)[19] = 0;
 
 	gettimeofday(&tv_start, NULL);
 
-	argon2_context context = init_argon2d_param((const char*)endiandata);
-	argon2_instance_t instance;
-	argon2_ctx_from_mtp(&context, &instance);
-	if (work_restart[thr_id].restart == 1) {
-		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-		return 0;
-	}
-	MerkleTree::Elements TheElements = mtp_init2(&instance); //,&TheElements);
-	if (work_restart[thr_id].restart == 1) {
-		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-		return 0;
-	}
-	MerkleTree ordered_tree(TheElements, true);
-	if (work_restart[thr_id].restart == 1) {
-		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-		return 0;
-	}
-	MerkleTree::Buffer root = ordered_tree.getRoot();
-	if (work_restart[thr_id].restart == 1) {
-		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-		return 0;
-	}
-	std::copy(root.begin(), root.end(), TheMerkleRoot);
-	if (work_restart[thr_id].restart == 1) {
-		free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-		return 0;
-	}
+	if (JobId[thr_id] != work->data[17]) {
+
+		if (JobId[thr_id] != 0)
+			free_memory(&context[thr_id], (unsigned char *)instance[thr_id].memory, instance[thr_id].memory_blocks, sizeof(block));
+
+		JobId[thr_id] = work->data[17];
+
+
+		context[thr_id] = init_argon2d_param((const char*)endiandata);
+		argon2_ctx_from_mtp(&context[thr_id], &instance[thr_id]);
+	
+//		if (work_restart[thr_id].restart == 1) 
+//		return 0;
+	
+		TheElements[thr_id] = mtp_init2(&instance[thr_id]);
+
+//		if (work_restart[thr_id].restart == 1) 
+//		return 0;
+	
+		ordered_tree[thr_id] = MerkleTree(TheElements[thr_id], true);
+printf("coming here\n");
+//		if (work_restart[thr_id].restart == 1) 
+//		return 0;
+	
+		 root[thr_id] = ordered_tree[thr_id].getRoot();
+//		if (work_restart[thr_id].restart == 1) 
+//			return 0;
+	
+		std::copy(root[thr_id].begin(), root[thr_id].end(), TheMerkleRoot[thr_id]);
+//		if (work_restart[thr_id].restart == 1) 
+//		return 0;
+	
+		}
 					gettimeofday(&tv_end, NULL);
 
 	timeval_subtract(&timediff, &tv_end, &tv_start);
 	if (timediff.tv_usec || timediff.tv_sec) {
-		printf("timediff %f time diff %d sec %d microsec \n",  (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
+		printf("******************************timediff %f time diff %d sec %d microsec \n",  (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
 	}
 
 	gettimeofday(&tv_start, NULL);
 	uint32_t throughput = 1;
-	uint32_t foundNonce = StartNonce /*- first_nonce*/;
+	uint32_t foundNonce = first_nonce;
 	printf("first nonce %08x thread id %d \n", foundNonce, thr_id);
-
+//	pdata[19] = StartNonce;
 	do {
 		int order = 0;
 
@@ -118,7 +130,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance, TheMerkleRoot, endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance[thr_id],(TheMerkleRoot[thr_id]), endiandata, TheUint256Target[0]);
 
 
 			if (is_sol == 1 && !work_restart[thr_id].restart) {
@@ -126,7 +138,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 				uint64_t nBlockMTP[MTP_L * 2][128];
 				unsigned char nProofMTP[MTP_L * 3 * 353];
 
-				mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
+				mtp_solver(foundNonce, &instance[thr_id], nBlockMTP, nProofMTP, TheMerkleRoot[thr_id], mtpHashValue, ordered_tree[thr_id], endiandata, TheUint256Target[0]);
 
 				int res = 1;
 				//	work_set_target_ratio(work, vhash64);		
@@ -137,7 +149,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 				/// fill mtp structure
 				mtp->MTPVersion = 0x1000;
 				for (int i = 0; i<16; i++)
-					mtp->MerkleRoot[i] = TheMerkleRoot[i];
+					mtp->MerkleRoot[i] = TheMerkleRoot[thr_id][i];
 				for (int i = 0; i<32; i++)
 					mtp->mtpHashValue[i] = mtpHashValue[i];
 
@@ -149,7 +161,7 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 				printf("found a solution thr_id %d\n", thr_id);
 //				compare_height(curl, work);
-				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+//				free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 				*hashes_done = foundNonce - first_nonce;
 				/////////////////
 
@@ -170,10 +182,10 @@ int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *ha
 
 	} while (!work_restart[thr_id].restart && StartNonce<0xffffffff);
 
-	free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+//	free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
 	*hashes_done = StartNonce - first_nonce;
 
-	TheElements.clear();
+//	TheElements.clear();
 
 	return 0;
 }

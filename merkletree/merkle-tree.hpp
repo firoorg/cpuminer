@@ -54,6 +54,8 @@ public :
      */
     MerkleTree(const Elements& elements, bool preserveOrder = false);
 
+	MerkleTree();
+
     /** Destructor */
     virtual ~MerkleTree();
 

@@ -2480,7 +2480,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			}
 
 		/* Increment extranonce2 */
-		for (size_t t = 0; t < sctx->xnonce2_size && !(++sctx->job.xnonce2[t]); t++);
+//		for (size_t t = 0; t < sctx->xnonce2_size && !(++sctx->job.xnonce2[t]); t++);
 
 		/* Assemble block header */
 		memset(work->data, 0, 128);
@@ -2831,6 +2831,7 @@ static void *miner_thread(void *userdata)
 		if (memcmp(&work.data[wkcmp_offset], &g_work.data[wkcmp_offset], wkcmp_sz) ||
 			jsonrpc_2 ? memcmp(((uint8_t*)work.data) + 43, ((uint8_t*)g_work.data) + 43, 33) : 0)
 		{
+printf("nonce getting reset\n");
 			work_free(&work);
 			work_copy(&work, &g_work);
 			nonceptr = (uint32_t*)(((char*)work.data) + nonce_oft);
