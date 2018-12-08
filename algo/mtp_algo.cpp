@@ -20,9 +20,9 @@ extern "C"
 #define SALTLEN 16
 #define PWD "password"
 
-static uint32_t JobId = 0;
+static  uint32_t JobId = 0;
 static  MerkleTree::Elements TheElements;
-static MerkleTree ordered_tree;
+static  MerkleTree ordered_tree;
 static  unsigned char TheMerkleRoot[16];
 static  argon2_context context;
 static  argon2_instance_t instance;
@@ -64,13 +64,21 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 
 	if (JobId != work->data[17]) {
 
-		if (JobId != 0)
+		if (JobId != 0) {
+			JobId = 0;
 			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-
+		}
 		JobId = work->data[17];
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
 		TheElements = mtp_init2(&instance);
+
+		if (TheElements.size()==0) {
+				JobId=0;
+				pthread_mutex_unlock(&work_lock);
+				return 0;
+		}
+
 		ordered_tree = MerkleTree(TheElements, true);
 		root = ordered_tree.getRoot();
 		std::copy(root.begin(), root.end(), TheMerkleRoot);
@@ -101,7 +109,7 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,(TheMerkleRoot), endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,TheMerkleRoot, endiandata, TheUint256Target[0]);
 
 
 			if (is_sol == 1 && !work_restart[thr_id].restart) {

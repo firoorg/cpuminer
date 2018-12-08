@@ -2,7 +2,7 @@
 //
 //#pragma once 
 #include "mtp.h"
-#include "sha3/sph_blake.h"
+#include "crypto/blake2b.h"
 #ifdef _MSC_VER
 #include <windows.h>
 #include <winbase.h> /* For SecureZeroMemory */
@@ -103,8 +103,16 @@ void compute_blake2b(const block& input,
 	ablake2b4rounds_update(&state, input.v, ARGON2_BLOCK_SIZE);
 	ablake2b4rounds_final(&state, digest, MERKLE_TREE_ELEMENT_SIZE_B);
 }
-
-
+/*
+void compute_blake2b(const block& input,
+	uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B])
+{
+	blake2b_ctx state;
+	blake2b_init(&state, MERKLE_TREE_ELEMENT_SIZE_B);
+	blake2b4rounds_update(&state, input.v, ARGON2_BLOCK_SIZE);
+	ablake2b4rounds_final(&state, digest, MERKLE_TREE_ELEMENT_SIZE_B);
+}
+*/
 void getblockindex(uint32_t ij, argon2_instance_t *instance, uint32_t *out_ij_prev, uint32_t *out_computed_ref_block)
 {
 	uint32_t ij_prev = 0;
@@ -592,12 +600,58 @@ int mtp_solver(uint32_t TheNonce, argon2_instance_t *instance,
 }
 
 
-int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
+int mtp_solver_nowriting_new(uint32_t TheNonce, argon2_instance_t *instance,
 	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget) {
 
 	if (instance != NULL) {
 		uint256 Y; 
 //		memset(&Y, 0, sizeof(Y));
+
+		blake2b_ctx BlakeHash;
+		blake2b_init(&BlakeHash, 32,0,0);
+		blake2b_update(&BlakeHash, (unsigned char*)&input[0], 80);
+		blake2b_update(&BlakeHash, (unsigned char*)&resultMerkleRoot[0], 16);
+		blake2b_update(&BlakeHash, &TheNonce, sizeof(unsigned int));
+		blake2b_final(&BlakeHash, (unsigned char*)&Y);
+
+		///////////////////////////////
+		bool init_blocks = false;
+		bool unmatch_block = false;
+
+
+		for (uint8_t j = 1; j <= L; j++) {
+
+			uint32_t ij = (((uint32_t*)(&Y))[0]) % (instance->context_ptr->m_cost);
+			uint32_t except_index = (uint32_t)(instance->context_ptr->m_cost / instance->context_ptr->lanes);
+			if (ij %except_index == 0 || ij%except_index == 1) {
+				init_blocks = true;
+				break;
+			}
+
+			blake2b_init(&BlakeHash, 32,0,0);
+			blake2b_update(&BlakeHash, &Y, sizeof(uint256));
+			blake2b_update(&BlakeHash, &instance->memory[ij].v, ARGON2_BLOCK_SIZE);
+			blake2b_final(&BlakeHash, (unsigned char*)&Y);
+
+		}
+
+		if (init_blocks) 
+					return 0;
+
+		if (Y <= hashTarget) 
+					return 1;
+
+	}
+	return 0;
+}
+
+
+int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
+	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget) {
+
+	if (instance != NULL) {
+		uint256 Y;
+		//		memset(&Y, 0, sizeof(Y));
 
 		ablake2b_state BlakeHash;
 		ablake2b_init(&BlakeHash, 32);
@@ -619,24 +673,34 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 				init_blocks = true;
 				break;
 			}
+			ablake2b_state BlakeHash2;
+			ablake2b_init(&BlakeHash2, 32);
+			ablake2b_update(&BlakeHash2, &Y, sizeof(uint256));
 
-			ablake2b_init(&BlakeHash, 32);
-			ablake2b_update(&BlakeHash, &Y, sizeof(uint256));
-			ablake2b_update(&BlakeHash, &instance->memory[ij].v, ARGON2_BLOCK_SIZE);
-			ablake2b_final(&BlakeHash, (unsigned char*)&Y, 32);
+			if (instance->memory[ij].v[0]==0 && instance->memory[ij].v[1] == 0)
+					return 0;
+
+
+			ablake2b_update(&BlakeHash2, &instance->memory[ij].v, ARGON2_BLOCK_SIZE);
+//			ablake2b_update(&BlakeHash2, blockhash_ref_bytes, ARGON2_BLOCK_SIZE);
+			ablake2b_final(&BlakeHash2, (unsigned char*)&Y, 32);
+
+//			clear_internal_memory(blockhash_ref.v, ARGON2_BLOCK_SIZE);
+//			clear_internal_memory(blockhash_ref_bytes, ARGON2_BLOCK_SIZE);
+
+
 
 		}
 
-		if (init_blocks) 
-					return 0;
+		if (init_blocks)
+			return 0;
 
-		if (Y <= hashTarget) 
-					return 1;
+		if (Y <= hashTarget)
+			return 1;
 
 	}
 	return 0;
 }
-
 
 
 void mtp_init( argon2_instance_t *instance,MerkleTree::Elements  *elements) {
@@ -666,13 +730,11 @@ MerkleTree::Elements   mtp_init2(argon2_instance_t *instance) {
 	//	MerkleTree::Elements elements;
 	if (instance != NULL) {
 		printf("Step 2 : Compute the root Φ of the Merkle hash tree \n");
-		uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B];
-		for (int i = 0; i < instance->memory_blocks/2; ++i) {
-			memset(digest,0,MERKLE_TREE_ELEMENT_SIZE_B);
-			compute_blake2b(instance->memory[2*i], digest);
-			elements.emplace_back(digest, digest + sizeof(digest));
-			memset(digest, 0, MERKLE_TREE_ELEMENT_SIZE_B);
-			compute_blake2b(instance->memory[2*i+1], digest);
+//		uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B];
+		for (int i = 0; i < instance->memory_blocks; ++i) {
+			uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B];
+//			memset(digest,0,MERKLE_TREE_ELEMENT_SIZE_B);
+			compute_blake2b(instance->memory[i], digest);
 			elements.emplace_back(digest, digest + sizeof(digest));
 //			elements->push_back(digest, digest + sizeof(digest));
 		}
