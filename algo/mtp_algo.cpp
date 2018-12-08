@@ -65,16 +65,18 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 	if (JobId != work->data[17]) {
 
 		if (JobId != 0) {
-			JobId = 0;
+//			JobId = 0;
 			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+//			return 0;
 		}
 		JobId = work->data[17];
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
-		TheElements = mtp_init2(&instance);
+		 mtp_init(&instance,&TheElements);
 
 		if (TheElements.size()==0) {
-				JobId=0;
+			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+//				JobId=0;
 				pthread_mutex_unlock(&work_lock);
 				return 0;
 		}
