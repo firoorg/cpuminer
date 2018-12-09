@@ -119,11 +119,11 @@ MerkleTree::Elements MerkleTree::getProofOrdered(const Buffer& element,
         size_t index) const
 {
     if (index == 0) {
-        throw std::runtime_error("Index is zero");
+//        throw std::runtime_error("Index is zero");
     }
     index--;
     if ((index >= elements_.size()) || (elements_[index] != element)) {
-        throw std::runtime_error("Index does not point to element");
+//        throw std::runtime_error("Index does not point to element");
     }
     return getProof(index);
 }
