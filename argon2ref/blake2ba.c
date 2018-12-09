@@ -351,49 +351,6 @@ printf(" \n");
  }
 
 
-
- int ablake2b_update_old(ablake2b_state *S, const void *in, size_t inlen) {
-//    uint8_t *pin = malloc(inlen); // = (const uint8_t *)in;
-//	memcpy(pin,(uint8_t*)in,inlen);
-    if (inlen == 0) {
-        return 0;
-    }
-
-    /* Sanity check */
-    if (S == NULL || in == NULL) {
-        return -1;
-    }
-
-    /* Is this a reused state? */ 
-    if (S->f[0] != 0) {
-        return -1;
-    }
-
-    if (S->buflen + inlen > ablake2b_BLOCKBYTES) {
-        /* Complete current block */
-        size_t left = S->buflen;
-        size_t fill = ablake2b_BLOCKBYTES - left;
-        memcpy(&S->buf[left], (uint8_t*)in, fill);
-        ablake2b_increment_counter(S, ablake2b_BLOCKBYTES);
-//		S->t[0] += (uint64_t)ablake2b_BLOCKBYTES;
-//		S->t[1] += (S->t[0] < (uint64_t)ablake2b_BLOCKBYTES);
-
-        ablake2b_compress(S, S->buf);
-        S->buflen = 0;
-        inlen -= fill;
-        (uint8_t*)in += fill;
-        /* Avoid buffer copies when possible */
-        while (inlen > ablake2b_BLOCKBYTES) {
-            ablake2b_increment_counter(S, ablake2b_BLOCKBYTES);
-            ablake2b_compress(S, (uint8_t*)in);
-            inlen -= ablake2b_BLOCKBYTES;
-            (uint8_t*)in += ablake2b_BLOCKBYTES;
-        }
-    }
-    memcpy(&S->buf[S->buflen], (uint8_t*)in, inlen);
-    S->buflen += (unsigned int)inlen;
-    return 0;
-}
  int ablake2b_update(ablake2b_state *S, const void *in, size_t inlen) {
 	 const uint8_t *pin = (const uint8_t *)in;
 
