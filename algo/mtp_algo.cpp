@@ -132,7 +132,7 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 				uint64_t nBlockMTP[MTP_L * 2][128];
 				unsigned char nProofMTP[MTP_L * 3 * 353];
 
-				mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
+				mtp_solver2(foundNonce, &instance,memory, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
 
 				int res = 1;
 				//	work_set_target_ratio(work, vhash64);		
