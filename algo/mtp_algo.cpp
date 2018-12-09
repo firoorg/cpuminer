@@ -26,7 +26,9 @@ static  MerkleTree ordered_tree;
 static  unsigned char TheMerkleRoot[16];
 static  argon2_context context;
 static  argon2_instance_t instance;
+static argon2_instance_t instance2;
 static  MerkleTree::Buffer root;
+static block *memory = (block*)malloc(memcost*128*sizeof(uint64_t*));
 
 
 
@@ -93,7 +95,9 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 		ordered_tree = MerkleTree(TheElements, true);
 		root = ordered_tree.getRoot();
 		std::copy(root.begin(), root.end(), TheMerkleRoot);
-	
+		for (int k = 0; k<memcost; k++)
+			memcpy(memory[k].v, instance.memory[k].v, 128 * sizeof(uint64_t));
+
 		}
 
 
@@ -120,7 +124,7 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,TheMerkleRoot, endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting2(foundNonce, &instance,memory,TheMerkleRoot, endiandata, TheUint256Target[0]);
 
 
 			if (is_sol == 1 && !work_restart[thr_id].restart) {

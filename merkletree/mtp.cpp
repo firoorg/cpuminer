@@ -702,6 +702,62 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 	return 0;
 }
 
+int mtp_solver_nowriting2(uint32_t TheNonce, argon2_instance_t *instance, block *memory,
+	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget) {
+
+	if (instance != NULL) {
+		uint256 Y;
+		//		memset(&Y, 0, sizeof(Y));
+
+		ablake2b_state BlakeHash;
+		ablake2b_init(&BlakeHash, 32);
+		ablake2b_update(&BlakeHash, (unsigned char*)&input[0], 80);
+		ablake2b_update(&BlakeHash, (unsigned char*)&resultMerkleRoot[0], 16);
+		ablake2b_update(&BlakeHash, &TheNonce, sizeof(unsigned int));
+		ablake2b_final(&BlakeHash, (unsigned char*)&Y, 32);
+
+		///////////////////////////////
+		bool init_blocks = false;
+		bool unmatch_block = false;
+
+
+		for (uint8_t j = 1; j <= L; j++) {
+
+			uint32_t ij = (((uint32_t*)(&Y))[0]) % (instance->context_ptr->m_cost);
+			uint32_t except_index = (uint32_t)(instance->context_ptr->m_cost / instance->context_ptr->lanes);
+			if (ij %except_index == 0 || ij%except_index == 1) {
+				init_blocks = true;
+				break;
+			}
+			ablake2b_state BlakeHash2;
+			ablake2b_init(&BlakeHash2, 32);
+			ablake2b_update(&BlakeHash2, &Y, sizeof(uint256));
+
+//			if (instance->memory[ij].v[0] == 0 && instance->memory[ij].v[1] == 0)
+//				return 0;
+
+
+			ablake2b_update(&BlakeHash2, &memory[ij].v, ARGON2_BLOCK_SIZE);
+			//			ablake2b_update(&BlakeHash2, blockhash_ref_bytes, ARGON2_BLOCK_SIZE);
+			ablake2b_final(&BlakeHash2, (unsigned char*)&Y, 32);
+
+			//			clear_internal_memory(blockhash_ref.v, ARGON2_BLOCK_SIZE);
+			//			clear_internal_memory(blockhash_ref_bytes, ARGON2_BLOCK_SIZE);
+
+
+
+		}
+
+		if (init_blocks)
+			return 0;
+
+		if (Y <= hashTarget)
+			return 1;
+
+	}
+	return 0;
+}
+
 
 void mtp_init( argon2_instance_t *instance,MerkleTree::Elements  *elements) {
 
