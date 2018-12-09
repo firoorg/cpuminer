@@ -33,7 +33,7 @@ static  MerkleTree::Buffer root;
 int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp)
 {
 
-
+	bool restart_flag = false;
 	struct timeval tv_start, tv_end, timediff;
 //	unsigned char TheMerkleRoot[16];
 	unsigned char mtpHashValue[32];
@@ -65,18 +65,27 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 	if (JobId != work->data[17]) {
 
 		if (JobId != 0) {
-//			JobId = 0;
+			JobId = 0;
 			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-//			return 0;
+			restart_flag = true;
 		}
+	}
+
+        pthread_mutex_unlock(&work_lock);
+	if (restart_flag) {
+		return 0;
+	}
+
+        pthread_mutex_lock(&work_lock);
+
+	if (JobId != work->data[17]) {
 		JobId = work->data[17];
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
-		 mtp_init(&instance,&TheElements);
+		TheElements = mtp_init2(&instance);
 
 		if (TheElements.size()==0) {
-			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-//				JobId=0;
+				JobId=0;
 				pthread_mutex_unlock(&work_lock);
 				return 0;
 		}
