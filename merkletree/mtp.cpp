@@ -372,6 +372,34 @@ void free_memory(const argon2_context *context, uint8_t *memory,
 	}
 }
 
+int allocate_memory(const argon2_context *context, uint8_t **memory,
+	size_t num, size_t size) {
+	size_t memory_size = num*size;
+	if (memory == NULL) {
+		return ARGON2_MEMORY_ALLOCATION_ERROR;
+	}
+
+	/* 1. Check for multiplication overflow */
+	if (size != 0 && memory_size / size != num) {
+		return ARGON2_MEMORY_ALLOCATION_ERROR;
+	}
+
+	/* 2. Try to allocate with appropriate allocator */
+	if (context->allocate_cbk) {
+		(context->allocate_cbk)(memory, memory_size);
+	}
+	else {
+		*memory = (uint8_t*)malloc(memory_size);
+	}
+
+	if (*memory == NULL) {
+		return ARGON2_MEMORY_ALLOCATION_ERROR;
+	}
+
+	return ARGON2_OK;
+}
+
+
 argon2_context init_argon2d_param(const char* input) {
 
 #define TEST_OUTLEN 32

@@ -63,12 +63,16 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 
 	pthread_mutex_lock(&work_lock);
 	gettimeofday(&tv_start, NULL);
+	if (JobId == 0 ) {
+	instance.first_use = 0;
+	}
 
+/*
 	if (JobId != work->data[17]) {
 
 		if (JobId != 0) {
 			JobId = 0;
-			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+			allocate_memory(&context, (unsigned char **)instance.memory, memcost, sizeof(block));
 			restart_flag = true;
 		}
 	}
@@ -77,13 +81,18 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 	if (restart_flag) {
 		return 0;
 	}
-
-        pthread_mutex_lock(&work_lock);
-
+*/
+        pthread_mutex_unlock(&work_lock);
+		pthread_mutex_lock(&work_lock);
 	if (JobId != work->data[17]) {
 		JobId = work->data[17];
+
+		if (instance.first_use!=0) 
+			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
+
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
+		instance.first_use=1;
 		TheElements = mtp_init2(&instance);
 
 		if (TheElements.size()==0) {
@@ -95,6 +104,8 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 		ordered_tree = MerkleTree(TheElements, true);
 		root = ordered_tree.getRoot();
 		std::copy(root.begin(), root.end(), TheMerkleRoot);
+//		pthread_mutex_unlock(&work_lock);
+//		pthread_mutex_lock(&work_lock);
 		for (int k = 0; k<memcost; k++)
 			memcpy(memory[k].v, instance.memory[k].v, 128 * sizeof(uint64_t));
 

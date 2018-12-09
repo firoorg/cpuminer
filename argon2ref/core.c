@@ -689,11 +689,14 @@ int initialize(argon2_instance_t *instance, argon2_context *context) {
 
     if (instance == NULL || context == NULL)
         return ARGON2_INCORRECT_PARAMETER;
+
     instance->context_ptr = context;
 
     /* 1. Memory allocation */
-    result = allocate_memory(context, (uint8_t **)&(instance->memory),
-                             instance->memory_blocks, sizeof(block));
+
+//	free((uint8_t*)&instance->memory);
+    result = allocate_memory(context, (uint8_t **)&(instance->memory),instance->memory_blocks, sizeof(block));
+
     if (result != ARGON2_OK) {
         return result;
     }
@@ -703,6 +706,7 @@ int initialize(argon2_instance_t *instance, argon2_context *context) {
     /* uint8_t blockhash[ARGON2_PREHASH_SEED_LENGTH]; */
     /* Hashing all inputs */
     initial_hash(blockhash, context, instance->type);
+
     /* Zeroing 8 extra bytes */
     clear_internal_memory(blockhash + ARGON2_PREHASH_DIGEST_LENGTH,
                           ARGON2_PREHASH_SEED_LENGTH -
@@ -717,7 +721,9 @@ int initialize(argon2_instance_t *instance, argon2_context *context) {
 
     /* 3. Creating first blocks, we always have at least two blocks in a slice
      */
+
     fill_first_blocks(blockhash, instance);
+
     /* Clearing the hash */
     clear_internal_memory(blockhash, ARGON2_PREHASH_SEED_LENGTH);
 

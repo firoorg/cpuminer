@@ -257,6 +257,7 @@ typedef struct Argon2_instance_t {
 	int print_internals; /* whether to print the memory blocks */
 	argon2_context *context_ptr; /* points back to original context */
 	uint32_t block_header[18]; // takes 256 first bits of the blockheader //hash_0
+	uint32_t first_use;
 } argon2_instance_t;
 
 
