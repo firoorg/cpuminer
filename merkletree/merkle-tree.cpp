@@ -50,7 +50,7 @@ MerkleTree::MerkleTree(const Elements& elements, bool preserveOrder)
         std::sort(elements_.begin(), elements_.end()); // sort elements
     }
 */
-printf("before getlayers\n");
+
     getLayers();
 }
 

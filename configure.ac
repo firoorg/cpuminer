@@ -137,9 +137,9 @@ AM_CONDITIONAL([ARCH_ARM], [test x$have_arm = xtrue])
 AM_CONDITIONAL([MINGW], [test "x$OS" = "xWindows_NT"])
 
 if test x$request_jansson = xtrue ; then
-        JANSSON_LIBS="compat/bos-jansson/libbosjansson.a"
+	JANSSON_LIBS="compat/bos-jansson/libbosjansson.a"
 else
-        JANSSON_LIBS=-lbosjansson
+	JANSSON_LIBS=-lbosjansson
 fi
 
 # libcurl install path (for mingw : --with-curl=/usr/local)
@@ -190,8 +190,8 @@ AC_SUBST(PTHREAD_LIBS)
 AC_SUBST(WS2_LIBS)
 
 AC_CONFIG_FILES([
-        Makefile
-        compat/Makefile
-        compat/bos-jansson/Makefile
-        ])
+	Makefile
+	compat/Makefile
+	compat/bos-jansson/Makefile
+	])
 AC_OUTPUT

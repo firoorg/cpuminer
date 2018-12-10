@@ -351,45 +351,47 @@ printf(" \n");
  }
 
 
+
  int ablake2b_update(ablake2b_state *S, const void *in, size_t inlen) {
-	 const uint8_t *pin = (const uint8_t *)in;
+    const uint8_t *pin = (const uint8_t *)in;
 
-	 if (inlen == 0) {
-		 return 0;
-	 }
+    if (inlen == 0) {
+        return 0;
+    }
 
-	 /* Sanity check */
-	 if (S == NULL || in == NULL) {
-		 return -1;
-	 }
+    /* Sanity check */
+    if (S == NULL || in == NULL) {
+        return -1;
+    }
 
-	 /* Is this a reused state? */
-	 if (S->f[0] != 0) {
-		 return -1;
-	 }
+    /* Is this a reused state? */
+    if (S->f[0] != 0) {
+        return -1;
+    }
 
-	 if (S->buflen + inlen > ablake2b_BLOCKBYTES) {
-		 /* Complete current block */
-		 size_t left = S->buflen;
-		 size_t fill = ablake2b_BLOCKBYTES - left;
-		 memcpy(&S->buf[left], pin, fill);
-		 ablake2b_increment_counter(S, ablake2b_BLOCKBYTES);
-		 ablake2b_compress(S, S->buf);
-		 S->buflen = 0;
-		 inlen -= fill;
-		 pin += fill;
-		 /* Avoid buffer copies when possible */
-		 while (inlen > ablake2b_BLOCKBYTES) {
-			 ablake2b_increment_counter(S, ablake2b_BLOCKBYTES);
-			 ablake2b_compress(S, pin);
-			 inlen -= ablake2b_BLOCKBYTES;
-			 pin += ablake2b_BLOCKBYTES;
-		 }
-	 }
-	 memcpy(&S->buf[S->buflen], pin, inlen);
-	 S->buflen += (unsigned int)inlen;
-	 return 0;
- }
+    if (S->buflen + inlen > ablake2b_BLOCKBYTES) {
+        /* Complete current block */
+        size_t left = S->buflen;
+        size_t fill = ablake2b_BLOCKBYTES - left;
+        memcpy(&S->buf[left], pin, fill);
+        ablake2b_increment_counter(S, ablake2b_BLOCKBYTES);
+        ablake2b_compress(S, S->buf);
+        S->buflen = 0;
+        inlen -= fill;
+        pin += fill;
+        /* Avoid buffer copies when possible */
+        while (inlen > ablake2b_BLOCKBYTES) {
+            ablake2b_increment_counter(S, ablake2b_BLOCKBYTES);
+            ablake2b_compress(S, pin);
+            inlen -= ablake2b_BLOCKBYTES;
+            pin += ablake2b_BLOCKBYTES;
+        }
+    }
+    memcpy(&S->buf[S->buflen], pin, inlen);
+    S->buflen += (unsigned int)inlen;
+    return 0;
+}
+
 
  int ablake2b_update_test(ablake2b_state *S, const void *in, size_t inlen) {
 	 const uint8_t *pin = (const uint8_t *)in;
