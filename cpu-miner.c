@@ -1226,7 +1226,7 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 		char coinb6[74] = { 0 };
 		char coinb7[90] = { 0 };
 		char script_payee[1024];
-		/*  // for mainnet
+	    // for mainnet
 		base58_decode("aCAgTPgtYcA4EysU4UKC86EQd5cTtHtCcr", script_payee);
 		job_pack_tx(coinb1, 50000000, script_payee);
 
@@ -1241,8 +1241,9 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 
 		base58_decode("a1kCCGddf5pMXSipLVD9hBG2MGGVNaJ15U", script_payee);
 		job_pack_tx(coinb5, 50000000, script_payee);
-		*/
+		
 		/* for testnet with znode payment */
+		/*
 		base58_decode("TDk19wPKYq91i18qmY6U9FeTdTxwPeSveo", script_payee);
 		job_pack_tx(coinb1, 50000000, script_payee);
 
@@ -1257,21 +1258,6 @@ static bool gbt_work_decode_mtp(const json_t *val, struct work *work)
 
 		base58_decode("TCsTzQZKVn4fao8jDmB9zQBk9YQNEZ3XfS", script_payee);
 		job_pack_tx(coinb5, 50000000, script_payee);
-		/*
-		base58_decode("TDk19wPKYq91i18qmY6U9FeTdTxwPeSveo", script_payee);
-		job_pack_tx(coinb1, 100000000, script_payee);
-
-		base58_decode("TWZZcDGkNixTAMtRBqzZkkMHbq1G6vUTk5", script_payee);
-		job_pack_tx(coinb2, 100000000, script_payee);
-
-		base58_decode("TRZTFdNCKCKbLMQV8cZDkQN9Vwuuq4gDzT", script_payee);
-		job_pack_tx(coinb3, 100000000, script_payee);
-
-		base58_decode("TG2ruj59E5b1u9G3F7HQVs6pCcVDBxrQve", script_payee);
-		job_pack_tx(coinb4, 100000000, script_payee);
-
-		base58_decode("TCsTzQZKVn4fao8jDmB9zQBk9YQNEZ3XfS", script_payee);
-		job_pack_tx(coinb5, 100000000, script_payee);
 		*/
 
 		if (mpay && json_integer_value(mnamount) != 0) {
@@ -2831,7 +2817,7 @@ static void *miner_thread(void *userdata)
 		if (memcmp(&work.data[wkcmp_offset], &g_work.data[wkcmp_offset], wkcmp_sz) ||
 			jsonrpc_2 ? memcmp(((uint8_t*)work.data) + 43, ((uint8_t*)g_work.data) + 43, 33) : 0)
 		{
-printf("nonce getting reset\n");
+//printf("nonce getting reset\n");
 			work_free(&work);
 			work_copy(&work, &g_work);
 			nonceptr = (uint32_t*)(((char*)work.data) + nonce_oft);

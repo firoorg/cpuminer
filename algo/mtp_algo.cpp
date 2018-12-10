@@ -26,10 +26,9 @@ static  MerkleTree ordered_tree;
 static  unsigned char TheMerkleRoot[16];
 static  argon2_context context;
 static  argon2_instance_t instance;
-static argon2_instance_t instance2;
 static  MerkleTree::Buffer root;
 static block *memory = (block*)malloc(memcost*128*sizeof(uint64_t*));
-
+static bool DoInitialization = true;
 
 
 int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp)
@@ -62,30 +61,27 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 		return 0;
 
 	pthread_mutex_lock(&work_lock);
-	gettimeofday(&tv_start, NULL);
+//	gettimeofday(&tv_start, NULL);
 	if (JobId == 0 ) {
 	instance.first_use = 0;
 	}
+        pthread_mutex_unlock(&work_lock);
 
-/*
-	if (JobId != work->data[17]) {
-
-		if (JobId != 0) {
-			JobId = 0;
-			allocate_memory(&context, (unsigned char **)instance.memory, memcost, sizeof(block));
-			restart_flag = true;
+	
+	pthread_mutex_lock(&work_lock);
+		if (JobId!=work->data[17]) {
+			DoInitialization = true;
+			JobId = work->data[17];
 		}
-	}
-
         pthread_mutex_unlock(&work_lock);
-	if (restart_flag) {
-		return 0;
-	}
-*/
-        pthread_mutex_unlock(&work_lock);
-		pthread_mutex_lock(&work_lock);
-	if (JobId != work->data[17]) {
-		JobId = work->data[17];
+		
+//		pthread_mutex_lock(&work_lock);
+	if (DoInitialization) {
+                pthread_mutex_lock(&work_lock);
+		work_restart[thr_id].restart = 1;
+                pthread_mutex_unlock(&work_lock);
+                pthread_mutex_lock(&work_lock);
+		DoInitialization = false;
 
 		if (instance.first_use!=0) 
 			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
@@ -100,24 +96,28 @@ int scanhash_mtp(pthread_mutex_t work_lock,int thr_id, struct work* work, uint32
 				pthread_mutex_unlock(&work_lock);
 				return 0;
 		}
-
+  //              pthread_mutex_unlock(&work_lock);
+		
+//		pthread_mutex_lock(&work_lock);
 		ordered_tree = MerkleTree(TheElements, true);
 		root = ordered_tree.getRoot();
 		std::copy(root.begin(), root.end(), TheMerkleRoot);
-//		pthread_mutex_unlock(&work_lock);
+		pthread_mutex_unlock(&work_lock);
+
 //		pthread_mutex_lock(&work_lock);
 		for (int k = 0; k<memcost; k++)
 			memcpy(memory[k].v, instance.memory[k].v, 128 * sizeof(uint64_t));
+ //               pthread_mutex_unlock(&work_lock);
 
 		}
+//		pthread_mutex_unlock(&work_lock);
 
-
-	gettimeofday(&tv_end, NULL);
-	pthread_mutex_unlock(&work_lock);	
-	timeval_subtract(&timediff, &tv_end, &tv_start);
-	if (timediff.tv_usec || timediff.tv_sec) {
-		printf("******************************timediff %f time diff %d sec %d microsec \n",  (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
-	}
+//	gettimeofday(&tv_end, NULL);
+//	pthread_mutex_unlock(&work_lock);	
+//	timeval_subtract(&timediff, &tv_end, &tv_start);
+//	if (timediff.tv_usec || timediff.tv_sec) {
+//		printf("******************************timediff %f time diff %d sec %d microsec \n",  (timediff.tv_sec + timediff.tv_usec * 1e-6), timediff.tv_sec, timediff.tv_usec);
+//	}
 
 
 
