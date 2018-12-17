@@ -334,7 +334,7 @@ Options:\n\
                           luffa        Luffa\n\
                           lyra2re      Lyra2RE\n\
                           lyra2rev2    Lyra2REv2 (Vertcoin)\n\
-						  mtp          MTP (Zcoin)\n\
+                          mtp          MTP (Zcoin)\n\
                           myr-gr       Myriad-Groestl\n\
                           neoscrypt    NeoScrypt(128, 2, 1)\n\
                           nist5        Nist5\n\
