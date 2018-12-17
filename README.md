@@ -161,7 +161,7 @@ _OR_
 
 Usage instructions
 ==================
-Run "cpuminer --help" to see options.
+Run `./cpuminer --help` to see options.
 
 ### Connecting through a proxy
 
