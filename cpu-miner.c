@@ -3065,7 +3065,7 @@ static void *miner_thread(void *userdata)
 			rc = scanhash_lyra2rev2(thr_id, &work, max_nonce, &hashes_done);
 			break;
 		case ALGO_MTP:
-			rc = scanhash_mtp(thr_id, &work, max_nonce, &hashes_done, mtp);
+			rc = scanhash_mtp(opt_n_threads, thr_id, &work, max_nonce, &hashes_done, mtp);
 			break;
 		case ALGO_MYR_GR:
 			rc = scanhash_myriad(thr_id, &work, max_nonce, &hashes_done);

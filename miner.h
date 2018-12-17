@@ -214,7 +214,7 @@ extern char *rpc_user, *rpc_pass;
 
 
 struct work;
-int scanhash_mtp(int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp);
+int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp);
 int scanhash_allium(int thr_id, struct work *work, uint32_t max_nonce, uint64_t *hashes_done);
 int scanhash_axiom(int thr_id, struct work *work, uint32_t max_nonce, uint64_t *hashes_done);
 int scanhash_bastion(int thr_id, struct work *work, uint32_t max_nonce, uint64_t *hashes_done);
