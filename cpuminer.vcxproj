@@ -120,7 +120,7 @@
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <CompileAsManaged>false</CompileAsManaged>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -146,7 +146,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <CompileAsManaged>false</CompileAsManaged>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -155,17 +155,18 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <CompileAs>Default</CompileAs>
-      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <StringPooling>true</StringPooling>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
@@ -180,6 +181,9 @@
       </FixedBaseAddress>
       <HeapReserveSize>100000000</HeapReserveSize>
       <StackReserveSize>100000000</StackReserveSize>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <AssemblyDebug>true</AssemblyDebug>
+      <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -328,6 +332,9 @@
     <ClInclude Include="argon2ref\argon2.h" />
     <ClInclude Include="argon2ref\blake2-impl.h" />
     <ClInclude Include="argon2ref\blake2.h" />
+    <ClInclude Include="argon2ref\blake2b-load-sse2.h" />
+    <ClInclude Include="argon2ref\blake2b-load-sse41.h" />
+    <ClInclude Include="argon2ref\blake2b-round.h" />
     <ClInclude Include="argon2ref\blamka-round-opt.h" />
     <ClInclude Include="argon2ref\blamka-round-ref.h" />
     <ClInclude Include="argon2ref\core.h" />

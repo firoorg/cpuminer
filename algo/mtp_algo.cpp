@@ -28,12 +28,13 @@ static  argon2_context context;
 static  argon2_instance_t instance;
 static pthread_mutex_t work_lock = PTHREAD_MUTEX_INITIALIZER;
 static	 pthread_barrier_t barrier;
+//static bool Should_wait = false;
 
 int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp)
 {
-
+	bool ShouldWait = false;
 	if (JobId == 0) 
-		pthread_barrier_init(&barrier, NULL, 1); 
+		pthread_barrier_init(&barrier, NULL, nthreads); 
 	
 
 	unsigned char mtpHashValue[32];
@@ -56,22 +57,29 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 		endiandata[k] = pdata[k];}
 	pdata[19] = first_nonce;
 
+
+	pthread_mutex_lock(&work_lock);
+
 	if (work_restart[thr_id].restart == 1)
 		return 0;
 
-	if (JobId != work->data[17]) {
-		int truc =  pthread_barrier_wait(&barrier);
+
+	pthread_mutex_unlock(&work_lock);
+
+	if (JobId != work->data[17] && JobId!=0) {
+		int truc = pthread_barrier_wait(&barrier);
 	}
 
 	pthread_mutex_lock(&work_lock);
 
 	if (JobId != work->data[17]) {
 
-		if (JobId != 0)
+		if (JobId != 0) {
 			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-
+		printf("cleaning stuff \n");
+		}
 		JobId = work->data[17];
-
+		ShouldWait = true;
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
 		TheElements = mtp_init2(&instance);
@@ -79,10 +87,12 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 		MerkleTree::Buffer  root = ordered_tree.getRoot();
 		std::copy(root.begin(), root.end(), TheMerkleRoot);
 
+	printf("end of init \n");
 		}
 
 	pthread_mutex_unlock(&work_lock);
 
+	
 	uint32_t throughput = 1;
 	uint32_t foundNonce = first_nonce;
 
@@ -94,7 +104,7 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,(TheMerkleRoot), endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,TheMerkleRoot, endiandata, TheUint256Target[0]);
 
 
 			if (is_sol == 1 && !work_restart[thr_id].restart) {
@@ -102,10 +112,10 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 				uint64_t nBlockMTP[MTP_L * 2][128];
 				unsigned char nProofMTP[MTP_L * 3 * 353];
 
-				mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
+				int res = mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
 
-				int res = 1;
-
+				if (res==0) printf("does not validate\n");
+				
 				pdata[19] = foundNonce;
 
 				/// fill mtp structure
