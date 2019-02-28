@@ -22,12 +22,13 @@ extern "C"
 
 static uint32_t JobId = 0;
 static  MerkleTree::Elements TheElements;
-static  MerkleTree ordered_tree;
+static  MerkleTree *ordered_tree;
 static  unsigned char TheMerkleRoot[16];
 static  argon2_context context;
 static  argon2_instance_t instance;
 static pthread_mutex_t work_lock = PTHREAD_MUTEX_INITIALIZER;
 static	 pthread_barrier_t barrier;
+static  uint8_t * dx;
 //static bool Should_wait = false;
 
 int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce, uint64_t *hashes_done, struct mtp* mtp)
@@ -76,18 +77,22 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 
 		if (JobId != 0) {
 			free_memory(&context, (unsigned char *)instance.memory, instance.memory_blocks, sizeof(block));
-		printf("cleaning stuff \n");
+			ordered_tree->Destructor();
+			free(dx);
+			delete ordered_tree;
 		}
 		JobId = work->data[17];
 		ShouldWait = true;
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
-		TheElements = mtp_init2(&instance);
-		ordered_tree = MerkleTree(TheElements, true);
-		MerkleTree::Buffer  root = ordered_tree.getRoot();
+//		TheElements = mtp_init2(&instance);
+//		mtp_init(&instance, &TheElements);
+		dx = (uint8_t*)malloc(sizeof(uint64_t) * 2 * 1048576 * 4);
+		mtp_init(&instance,dx);
+		ordered_tree = new MerkleTree(dx, true);
+		MerkleTree::Buffer  root = ordered_tree->getRoot();
 		std::copy(root.begin(), root.end(), TheMerkleRoot);
 
-	printf("end of init \n");
 		}
 
 	pthread_mutex_unlock(&work_lock);
@@ -112,7 +117,7 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 				uint64_t nBlockMTP[MTP_L * 2][128];
 				unsigned char nProofMTP[MTP_L * 3 * 353];
 
-				int res = mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, ordered_tree, endiandata, TheUint256Target[0]);
+				int res = mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, *ordered_tree, endiandata, TheUint256Target[0]);
 
 				if (res==0) printf("does not validate\n");
 				

@@ -470,6 +470,7 @@ struct stratum_ctx {
 	char curl_err_str[CURL_ERROR_SIZE];
 	curl_socket_t sock;
 	size_t sockbuf_size;
+	size_t sockbuf_bossize; // redundant
 	char *sockbuf;
 	pthread_mutex_t sock_lock;
 
@@ -491,7 +492,8 @@ char *stratum_recv_line_boschar(struct stratum_ctx *sctx);
 bool stratum_socket_full(struct stratum_ctx *sctx, int timeout);
 bool stratum_send_line(struct stratum_ctx *sctx, char *s);
 bool stratum_send_line_bos(struct stratum_ctx *sctx, bos_t *s);
-
+void stratum_bos_fillbuffer(struct stratum_ctx *sctx);
+json_t* recode_message(json_t *MyObject2);
 json_t *stratum_recv_line_bos(struct stratum_ctx *sctx);
 bool stratum_recv_line_compact(struct stratum_ctx *sctx);
 bool stratum_connect(struct stratum_ctx *sctx, const char *url);

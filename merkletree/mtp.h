@@ -64,5 +64,5 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 
 
 // MerkleTree::Elements mtp_init(argon2_instance_t *instance);
-void mtp_init(argon2_instance_t *instance, MerkleTree::Elements  *elements);
+void mtp_init(argon2_instance_t *instance, uint8_t  *elements);
 MerkleTree::Elements   mtp_init2(argon2_instance_t *instance);

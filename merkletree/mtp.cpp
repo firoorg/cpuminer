@@ -706,12 +706,12 @@ int mtp_solver(uint32_t TheNonce, argon2_instance_t *instance,
 			clear_internal_memory(blockhash_prev.v, ARGON2_BLOCK_SIZE);
 			clear_internal_memory(blockhash_prev_bytes, ARGON2_BLOCK_SIZE);
 
-			std::deque<std::vector<uint8_t>> zProofMTP2 = TheTree.getProofOrdered(hash_prev, prev_index + 1);
+			 zProofMTP = TheTree.getProofOrdered(hash_prev, prev_index + 1);
 
-			nProofMTP[(j * 3 - 2) * 353] = (unsigned char)(zProofMTP2.size());
+			nProofMTP[(j * 3 - 2) * 353] = (unsigned char)(zProofMTP.size());
 
 			int k2 = 0;
-			for (const std::vector<uint8_t> &mtpData : zProofMTP2) {
+			for (const std::vector<uint8_t> &mtpData : zProofMTP) {
 				std::copy(mtpData.begin(), mtpData.end(), nProofMTP + ((j * 3 - 2) * 353 + 1 + k2 * mtpData.size()));
 				k2++;
 			}
@@ -732,12 +732,12 @@ int mtp_solver(uint32_t TheNonce, argon2_instance_t *instance,
 			clear_internal_memory(blockhash_ref.v, ARGON2_BLOCK_SIZE);
 			clear_internal_memory(blockhash_ref_bytes, ARGON2_BLOCK_SIZE);
 
-			std::deque<std::vector<uint8_t>> zProofMTP3 = TheTree.getProofOrdered(hash_ref, ref_index + 1);
+			/* std::deque<std::vector<uint8_t>> */ zProofMTP = TheTree.getProofOrdered(hash_ref, ref_index + 1);
 
-			nProofMTP[(j * 3 - 1) * 353] = (unsigned char)(zProofMTP3.size());
+			nProofMTP[(j * 3 - 1) * 353] = (unsigned char)(zProofMTP.size());
 
 			int k3 = 0;
-			for (const std::vector<uint8_t> &mtpData : zProofMTP3) {
+			for (const std::vector<uint8_t> &mtpData : zProofMTP) {
 				std::copy(mtpData.begin(), mtpData.end(), nProofMTP + ((j * 3 - 1) * 353 + 1 + k3 * mtpData.size()));
 				k3++;
 			}
@@ -826,22 +826,20 @@ int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 
 
 
-void mtp_init( argon2_instance_t *instance,MerkleTree::Elements  *elements) {
+void mtp_init( argon2_instance_t *instance,uint8_t  *elements) {
 
 	printf("Step 1 : Compute F(I) and store its T blocks X[1], X[2], ..., X[T] in the memory \n");
-//	MerkleTree::Elements elements;
+
 	if (instance != NULL) {
 		printf("Step 2 : Compute the root Φ of the Merkle hash tree \n");
 
 		for (long int i = 0; i < instance->memory_blocks; ++i) {
 			uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B];
 			compute_blake2b(instance->memory[i], digest);
-			elements->emplace_back(digest, digest + sizeof(digest));
-//			elements->push_back(digest, digest + sizeof(digest));
+//			elements->emplace_back(digest, digest + sizeof(digest));
+			memcpy(elements + i*MERKLE_TREE_ELEMENT_SIZE_B,digest, MERKLE_TREE_ELEMENT_SIZE_B);
 		}
-
 		printf("end Step 2 : Compute the root Φ of the Merkle hash tree \n");
-//		return elements;
 	}
 
 }

@@ -1873,15 +1873,16 @@ static bool submit_upstream_work_mtp(CURL *curl, struct work *work, struct mtp *
 			json_t *json_arr = json_array();
 			json_object_set_new(MyObject, "id", json_integer(4));
 			json_object_set_new(MyObject, "method", json_string("mining.submit"));
-			json_object_set_new(MyObject, "params", json_arr);
+//			json_object_set_new(MyObject, "params", json_arr);
 			json_array_append(json_arr, json_string(rpc_user));
 			
-			json_t * Truc =json_bytes(0,0);
+//			json_t * Truc =json_bytes(0,0);
 
 			int Err=0;
 			
 			uchar* hexjob_id = (uchar*)malloc(strlen(work->job_id) / 2);
 			hex2bin(hexjob_id,work->job_id,strlen(work->job_id));
+/*
 			json_bytes_set(Truc, hexjob_id,strlen(work->job_id)/2);			
 			json_array_append(json_arr, Truc);
 			Truc = json_bytes(0, 0);
@@ -1904,6 +1905,18 @@ static bool submit_upstream_work_mtp(CURL *curl, struct work *work, struct mtp *
 			Truc = json_bytes(0, 0);
 			json_bytes_set(Truc,mtp->nProofMTP, SizeProofMTP);
 			json_array_append(json_arr, Truc);
+*/
+
+			json_array_append(json_arr, json_bytes(hexjob_id, strlen(work->job_id) / 2));
+			free(hexjob_id);
+			json_array_append(json_arr, json_bytes(work->xnonce2, sizeof(uint64_t*)));
+			json_array_append(json_arr, json_bytes((uchar*)&ntime, sizeof(uint32_t)));
+			json_array_append(json_arr, json_bytes((uchar*)&nonce, sizeof(uint32_t)));
+			json_array_append(json_arr, json_bytes(mtp->MerkleRoot, SizeMerkleRoot));
+			json_array_append(json_arr, json_bytes((uchar*)mtp->nBlockMTP, SizeBlockMTP));
+			json_array_append(json_arr, json_bytes(mtp->nProofMTP, SizeProofMTP));
+
+			json_object_set_new(MyObject, "params", json_arr);
 
 			json_error_t *boserror = (json_error_t *)malloc(sizeof(json_error_t));
 
@@ -3527,6 +3540,8 @@ static void *stratum_thread(void *userdata)
 	char *s;
 	json_t *s_json;
 	bool stillworking = true;
+//	stratum_ctx *ctx = &stratum;
+	struct stratum_ctx *ctx = &stratum;
 	stratum.url = (char*)tq_pop(mythr->q, NULL);
 	if (!stratum.url)
 		goto out;
@@ -3632,7 +3647,7 @@ static void *stratum_thread(void *userdata)
 		else {
 			if (opt_algo == ALGO_MTP)
 			{
-				
+/*				
 				json_t *s2;
 				s2 = stratum_recv_line_c2(&stratum);
 
@@ -3646,6 +3661,30 @@ static void *stratum_thread(void *userdata)
 				if (!stratum_handle_method_bos_json(&stratum, s2))
 					stratum_handle_response_json(s2);
 				json_decref(s2);
+*/
+
+//json_t *MyObject = json_object();
+			
+				uint32_t bossize = 0;
+				bool isok = false;
+				stratum_bos_fillbuffer(ctx);
+				json_error_t *boserror = (json_error_t *)malloc(sizeof(json_error_t));
+				do {
+					json_t *MyObject2 = bos_deserialize(ctx->sockbuf + bossize, boserror);
+					bossize += bos_sizeof(ctx->sockbuf + bossize);
+					json_t *MyObject = recode_message(MyObject2);
+					isok = stratum_handle_method_bos_json(ctx, MyObject);
+					json_decref(MyObject2);
+					if (!isok) { // is an answer upon share submission
+						stratum_handle_response_json(MyObject);
+
+					}
+					json_decref(MyObject);
+				} while (bossize != ctx->sockbuf_bossize);
+				free(boserror);
+				ctx->sockbuf[0] = '\0';
+				ctx->sockbuf_bossize = 0;
+				ctx->sockbuf = (char*)realloc(ctx->sockbuf, ctx->sockbuf_bossize + 1);
 			}
 			else {
 				s = stratum_recv_line(&stratum);
