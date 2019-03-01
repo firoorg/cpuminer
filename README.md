@@ -107,7 +107,7 @@ _OR_
  ./configure CFLAGS="*-march=native*" --with-crypto --with-curl
 
  _FOR_MTP_
- ./configure CFLAGS= --with-crypto --with-curl
+ ./configure  --with-crypto --with-curl
 
  # Use -march=native if building for a single machine
  make
