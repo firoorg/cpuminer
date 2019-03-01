@@ -232,7 +232,7 @@ bool opt_randomize = false;
 static int opt_retries = -1;
 static int opt_fail_pause = 10;
 static int opt_time_limit = 0;
-int opt_timeout = 300;
+int opt_timeout = 60;
 static int opt_scantime = 500;
 static const bool opt_time = true;
 static enum algos opt_algo = ALGO_SCRYPT;
@@ -2681,6 +2681,7 @@ static bool wanna_mine(int thr_id)
 
 static void *miner_thread(void *userdata)
 {
+
 	struct thr_info *mythr = (struct thr_info *) userdata;
 	struct mtp * mtp = (struct mtp*)malloc(sizeof(struct mtp));
 	int thr_id = mythr->id;
@@ -2690,6 +2691,7 @@ static void *miner_thread(void *userdata)
 	time_t tm_rate_log = 0;
 	time_t firstwork_time = 0;
 	unsigned char *scratchbuf = NULL;
+	bool extrajob = false;
 	char s[16];
 	int i;
 
@@ -2768,6 +2770,7 @@ static void *miner_thread(void *userdata)
 	}
 
 	while (1) {
+
 		uint64_t hashes_done;
 		struct timeval tv_start, tv_end, diff;
 		int64_t max64;
@@ -2803,9 +2806,18 @@ static void *miner_thread(void *userdata)
 		uint32_t *nonceptr = (uint32_t*)(((char*)work.data) + nonce_oft);
 
 		if (have_stratum) {
-			while (!jsonrpc_2 && time(NULL) >= g_work_time + 120)
+			uint32_t sleeptime = 0;
+			while (opt_algo != ALGO_MTP && !jsonrpc_2 && time(NULL) >= g_work_time + 120) {
 				sleep(1);
-
+				if (sleeptime > 4) {
+					extrajob = true;
+					break;
+				}
+				sleeptime++;
+			}
+			while (opt_algo == ALGO_MTP && !jsonrpc_2 && g_work_time == 0) {
+				sleep(1);
+			}
 			while (!stratum.job.diff && opt_algo == ALGO_NEOSCRYPT) {
 				applog(LOG_DEBUG, "Waiting for Stratum to set the job difficulty");
 				sleep(1);
@@ -2814,9 +2826,12 @@ static void *miner_thread(void *userdata)
 			pthread_mutex_lock(&g_work_lock);
 
 			// to clean: is g_work loaded before the memcmp ?
+
 			regen_work = regen_work || ((*nonceptr) >= end_nonce
 				&& !(memcmp(&work.data[wkcmp_offset], &g_work.data[wkcmp_offset], wkcmp_sz) ||
 					jsonrpc_2 ? memcmp(((uint8_t*)work.data) + 43, ((uint8_t*)g_work.data) + 43, 33) : 0));
+			regen_work = regen_work || extrajob;
+
 			if (regen_work || opt_algo==ALGO_MTP) {
 				stratum_gen_work(&stratum, &g_work);
 			}
@@ -3645,6 +3660,7 @@ static void *stratum_thread(void *userdata)
 			s = NULL;
 		}
 		else {
+
 			if (opt_algo == ALGO_MTP)
 			{
 /*				

@@ -760,8 +760,8 @@ int mtp_solver(uint32_t TheNonce, argon2_instance_t *instance,
 				mtpHashValue[i] = (((unsigned char*)(&Y))[i]);
 
 			// Found a solution
-			printf("Found a solution. Nonce=%08x Hash:", TheNonce);
-			printf("\n");
+//			printf("Found a solution. Nonce=%08x Hash:", TheNonce);
+//			printf("\n");
 			return 1;
 
 

@@ -146,7 +146,13 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 			StartNonce += throughput;
 		}
 
+		if (StartNonce>real_maxnonce)
+			printf("Starnonce bigger than maxnonce Startnonce %08x maxnonce %08x\n", StartNonce, real_maxnonce);
+
 	} while (!work_restart[thr_id].restart &&  StartNonce<real_maxnonce);
+
+	if (StartNonce>real_maxnonce)
+		printf("Starnonce bigger than maxnonce Startnonce %08x maxnonce %08x\n", StartNonce, real_maxnonce);
 
 	*hashes_done = StartNonce - first_nonce;
 
