@@ -232,7 +232,7 @@ bool opt_randomize = false;
 static int opt_retries = -1;
 static int opt_fail_pause = 10;
 static int opt_time_limit = 0;
-int opt_timeout = 60;
+int opt_timeout = 300;
 static int opt_scantime = 500;
 static const bool opt_time = true;
 static enum algos opt_algo = ALGO_SCRYPT;
@@ -1880,35 +1880,9 @@ static bool submit_upstream_work_mtp(CURL *curl, struct work *work, struct mtp *
 
 			int Err=0;
 			
-			uchar* hexjob_id = (uchar*)malloc(strlen(work->job_id) / 2);
-			hex2bin(hexjob_id,work->job_id,strlen(work->job_id));
-/*
-			json_bytes_set(Truc, hexjob_id,strlen(work->job_id)/2);			
-			json_array_append(json_arr, Truc);
-			Truc = json_bytes(0, 0);
-			Err = json_bytes_set(Truc, work->xnonce2, sizeof(uint64_t*));
-			json_array_append(json_arr, Truc);
-			Truc = json_bytes(0, 0);
-			json_bytes_set(Truc,(uchar*)&ntime, sizeof(uint32_t));
-			json_array_append(json_arr, Truc);
-			Truc = json_bytes(0, 0);
-			json_bytes_set(Truc, (uchar*)&nonce, sizeof(uint32_t));
-			json_array_append(json_arr, Truc);
-			Truc = json_bytes(0, 0);
-			json_bytes_set(Truc, mtp->MerkleRoot, SizeMerkleRoot);
-			json_array_append(json_arr,Truc);
-			Truc = json_bytes(0, 0);
-
-			json_bytes_set(Truc, (uchar*)mtp->nBlockMTP, SizeBlockMTP);
-
-			json_array_append(json_arr, Truc);
-			Truc = json_bytes(0, 0);
-			json_bytes_set(Truc,mtp->nProofMTP, SizeProofMTP);
-			json_array_append(json_arr, Truc);
-*/
-
+			uchar hexjob_id[4]; 
+			hex2bin(hexjob_id,work->job_id,8);
 			json_array_append(json_arr, json_bytes(hexjob_id, strlen(work->job_id) / 2));
-			free(hexjob_id);
 			json_array_append(json_arr, json_bytes(work->xnonce2, sizeof(uint64_t*)));
 			json_array_append(json_arr, json_bytes((uchar*)&ntime, sizeof(uint32_t)));
 			json_array_append(json_arr, json_bytes((uchar*)&nonce, sizeof(uint32_t)));
