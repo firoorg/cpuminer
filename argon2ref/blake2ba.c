@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 
+
 #include "argon2ref/blake2.h"
 #include "argon2ref/blake2-impl.h"
 #include "argon2ref/blake2b-round.h"
@@ -26,7 +27,7 @@
 #if defined(_MSC_VER)
 #include <intrin.h>
 #endif
-#define HAVE_AVX
+//#define HAVE_AVX
 // #define HAVE_SSE2
 #if defined(HAVE_SSE2)
 #include <emmintrin.h>

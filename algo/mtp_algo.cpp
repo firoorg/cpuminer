@@ -85,8 +85,7 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 		ShouldWait = true;
 		context = init_argon2d_param((const char*)endiandata);
 		argon2_ctx_from_mtp(&context, &instance);	
-//		TheElements = mtp_init2(&instance);
-//		mtp_init(&instance, &TheElements);
+
 		dx = (uint8_t*)malloc(sizeof(uint64_t) * 2 * 1048576 * 4);
 		mtp_init(&instance,dx);
 		ordered_tree = new MerkleTree(dx, true);

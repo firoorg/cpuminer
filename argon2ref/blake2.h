@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <limits.h>
+#include "cpuminer-config.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -42,6 +43,7 @@ typedef struct __ablake2b_param {
     uint8_t depth;                           /* 4 */
     uint32_t leaf_length;                    /* 8 */
     uint64_t node_offset;                    /* 16 */
+//	uint32_t xof_length;    /* 16 */ //add on blake2bp mod
     uint8_t node_depth;                      /* 17 */
     uint8_t inner_length;                    /* 18 */
     uint8_t reserved[14];                    /* 32 */
@@ -59,6 +61,18 @@ typedef struct __ablake2b_state {
     unsigned outlen;
     uint8_t last_node;
 } ablake2b_state;
+
+
+typedef struct blake2bp_state__
+{
+	ablake2b_state S[4][1];
+	ablake2b_state R[1];
+	uint8_t       buf[4 * ablake2b_BLOCKBYTES];
+	size_t        buflen;
+	size_t        outlen;
+} blake2bp_state;
+
+
 
 /* Ensure param structs have not been wrongly padded */
 /* Poor man's static_assert */
@@ -90,6 +104,12 @@ int ablake2b_long2(void * pout, size_t outlen, const void * in, size_t inlen);
 /* Simple API */
 int blake2b(void *out, size_t outlen, const void *in, size_t inlen,
             const void *key, size_t keylen);
+
+
+int blake2bp_init(blake2bp_state *S, size_t outlen);
+int blake2bp_init_key(blake2bp_state *S, size_t outlen, const void *key, size_t keylen);
+int blake2bp_update(blake2bp_state *S, const void *in, size_t inlen);
+int blake2bp_final(blake2bp_state *S, void *out, size_t outlen);
 
 
 

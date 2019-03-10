@@ -122,15 +122,27 @@
 /* Define to 1 if AVX assembly is available. */
 #define USE_AVX 1
 
+#if (defined(USE_AVX))
+	#define HAVE_AVX 1
+#endif
 /* Define to 1 if AVX2 assembly is available. */
 #define USE_AVX2 1
-
+//#if (defined(USE_AVX2))
+//#define HAVE_AVX2 1
+//#endif
 /* Define if __uint128_t is available */
 #define USE_INT128 1
 
+#if (defined(USE_INT128))
+//#define HAVE_INT128 1
+#endif
 /* Define to 1 if XOP assembly is available. */
-#define USE_XOP 1
 
+#define HAVE_SSSE3 1
+#define HAVE_SSE4_1 1
+#if (defined(USE_XOP))
+//#define HAVE_XOP 1
+#endif
 /* Version number of package */
 #define VERSION "0.1.0"
 

@@ -391,6 +391,9 @@
     <ClCompile Include="compat\bos-jansson\value.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
+    <ClCompile Include="argon2ref\blake2bp.c">
+      <Filter>argon2ref</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sha3\sph_blake.h">

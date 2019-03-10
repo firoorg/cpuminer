@@ -155,7 +155,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <CompileAs>Default</CompileAs>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
@@ -190,6 +190,7 @@
     <ClCompile Include="algo\mtp_algo.cpp" />
     <ClCompile Include="argon2ref\argon2.c" />
     <ClCompile Include="argon2ref\blake2ba.c" />
+    <ClCompile Include="argon2ref\blake2bp.c" />
     <ClCompile Include="argon2ref\core.c" />
     <ClCompile Include="argon2ref\encoding.c" />
     <ClCompile Include="argon2ref\ref.c" />

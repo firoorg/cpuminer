@@ -844,6 +844,27 @@ void mtp_init( argon2_instance_t *instance,uint8_t  *elements) {
 
 }
 
+void mtp_init_parallel(int nthread, int thr_id,argon2_instance_t *instance, uint8_t  *elements) {
+
+	printf("Step 1 : Compute F(I) and store its T blocks X[1], X[2], ..., X[T] in the memory \n");
+
+	if (instance != NULL) {
+		printf("Step 2 : Compute the root Φ of the Merkle hash tree \n");
+
+int chunk_up  = (nthread!=thr_id+1)?  (instance->memory_blocks /nthread) * (thr_id+1) : instance->memory_blocks;
+int chunk_low = (instance->memory_blocks/nthread) * thr_id;
+		for (long int i = chunk_low; i < chunk_up; ++i) {
+			uint8_t digest[MERKLE_TREE_ELEMENT_SIZE_B];
+			compute_blake2b(instance->memory[i], digest);
+			//			elements->emplace_back(digest, digest + sizeof(digest));
+			memcpy(elements + i*MERKLE_TREE_ELEMENT_SIZE_B, digest, MERKLE_TREE_ELEMENT_SIZE_B);
+		}
+		printf("end Step 2 : Compute the root Φ of the Merkle hash tree \n");
+	}
+
+}
+
+
 MerkleTree::Elements   mtp_init2(argon2_instance_t *instance) {
 
 	MerkleTree::Elements  elements;

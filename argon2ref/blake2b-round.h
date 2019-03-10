@@ -11,8 +11,9 @@
    this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
 #pragma once
-#define HAVE_AVX
-//#define HAVE_SSSE3
+#include "cpuminer-config.h"
+
+
 #ifndef __BLAKE2B_ROUND_H__
 #define __BLAKE2B_ROUND_H__
 
