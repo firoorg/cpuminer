@@ -80,6 +80,8 @@ fi
 
 if test x$enable_assembly != xno -a x$have_x86_64 = xtrue
 then
+    AC_DEFINE(HAVE_AVX, 1, [Define to 1 if AVX assembly is available.])
+    AC_DEFINE(HAVE_AVX2, 1, [Define to 1 if AVX assembly is available.])
   AC_MSG_CHECKING(whether we can compile AVX code)
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,[asm ("vmovdqa %ymm0, %ymm1");])],
     AC_DEFINE(USE_AVX, 1, [Define to 1 if AVX assembly is available.])
