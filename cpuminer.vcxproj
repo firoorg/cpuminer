@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -27,14 +27,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -42,14 +42,14 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -120,7 +120,7 @@
       <Optimization>MaxSpeed</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <CompileAsManaged>false</CompileAsManaged>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -146,7 +146,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <CompileAsManaged>false</CompileAsManaged>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -155,21 +155,22 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <CompileAs>Default</CompileAs>
-      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <ExceptionHandling>SyncCThrow</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <StringPooling>true</StringPooling>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;pthreadVC2.lib;libcurl.x64.lib;openssl.x64.lib;zlib.x64.lib;ws2_32.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;pthreadVC2.lib;libeay32MT.lib;libsslMT.lib;ssleay32MT.lib;libcurl.lib;zlibstat.lib;ws2_32.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>compat\pthreads\x64;compat\curl-for-windows\out\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
       <LinkStatus>false</LinkStatus>
@@ -180,12 +181,16 @@
       </FixedBaseAddress>
       <HeapReserveSize>100000000</HeapReserveSize>
       <StackReserveSize>100000000</StackReserveSize>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <AssemblyDebug>true</AssemblyDebug>
+      <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="algo\mtp_algo.cpp" />
     <ClCompile Include="argon2ref\argon2.c" />
     <ClCompile Include="argon2ref\blake2ba.c" />
+    <ClCompile Include="argon2ref\blake2bp.c" />
     <ClCompile Include="argon2ref\core.c" />
     <ClCompile Include="argon2ref\encoding.c" />
     <ClCompile Include="argon2ref\ref.c" />
@@ -328,6 +333,9 @@
     <ClInclude Include="argon2ref\argon2.h" />
     <ClInclude Include="argon2ref\blake2-impl.h" />
     <ClInclude Include="argon2ref\blake2.h" />
+    <ClInclude Include="argon2ref\blake2b-load-sse2.h" />
+    <ClInclude Include="argon2ref\blake2b-load-sse41.h" />
+    <ClInclude Include="argon2ref\blake2b-round.h" />
     <ClInclude Include="argon2ref\blamka-round-opt.h" />
     <ClInclude Include="argon2ref\blamka-round-ref.h" />
     <ClInclude Include="argon2ref\core.h" />

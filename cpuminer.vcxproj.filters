@@ -391,6 +391,9 @@
     <ClCompile Include="compat\bos-jansson\value.c">
       <Filter>bos-jansson</Filter>
     </ClCompile>
+    <ClCompile Include="argon2ref\blake2bp.c">
+      <Filter>argon2ref</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sha3\sph_blake.h">
@@ -644,6 +647,15 @@
     </ClInclude>
     <ClInclude Include="compat\bos-jansson\utf.h">
       <Filter>bos-jansson</Filter>
+    </ClInclude>
+    <ClInclude Include="argon2ref\blake2b-load-sse2.h">
+      <Filter>argon2ref</Filter>
+    </ClInclude>
+    <ClInclude Include="argon2ref\blake2b-load-sse41.h">
+      <Filter>argon2ref</Filter>
+    </ClInclude>
+    <ClInclude Include="argon2ref\blake2b-round.h">
+      <Filter>argon2ref</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

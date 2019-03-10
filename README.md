@@ -1,7 +1,7 @@
 CPUMiner-Multi
 ==============
 
-[![Build Status](https://travis-ci.org/tpruvot/cpuminer-multi.svg)](https://travis-ci.org/tpruvot/cpuminer-multi)
+
 
 This is a multi-threaded CPU miner,
 fork of [pooler](//github.com/pooler)'s cpuminer (see AUTHORS for list of contributors).
@@ -40,6 +40,7 @@ Algorithms
  * ✓ __lbry__ (LBRY Credits [LBC])
  * ✓ __lyra2RE__ (Cryptocoin)
  * ✓ __lyra2REv2__ (VertCoin [VTC])
+ * ✓ __mtp__ (Zcoin [XZC])
  * ✓ __myr-gr__ Myriad-Groestl (MyriadCoin [MYR])
  * ✓ __neoscrypt__ (Feathercoin)
  * ✓ __nist5__ (MistCoin [MIC], TalkCoin [TAC], ...)
@@ -104,6 +105,10 @@ _OR_
  ./autogen.sh	# only needed if building from git repo
  ./nomacro.pl	# only needed if building on Mac OS X or with Clang
  ./configure CFLAGS="*-march=native*" --with-crypto --with-curl
+
+ _FOR_MTP_
+ ./configure  --with-crypto --with-curl
+
  # Use -march=native if building for a single machine
  make
 ```
@@ -177,6 +182,10 @@ Donations
 =========
 Donations for the work done in this fork are accepted :
 
+djm34:
+* BTC: 1NENYmxwZGHsKFmyjTc5WferTn5VTFb7Ze
+* XZC: aChWVb8CpgajadpLmiwDZvZaKizQgHxfh5
+
 Tanguy Pruvot :
 * BTC: `1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd`
 
@@ -187,6 +196,7 @@ Lucas Jones :
 Credits
 =======
 CPUMiner-multi was forked from pooler's CPUMiner, and has been started by Lucas Jones.
+* [djm34 2018-2019](https://github.com/djm34 and https://github.com/zcoinofficiak) added mtp algo, stratum based on bos-janson for mtp algo, gbt support for zcoin/mtp
 * [tpruvot](https://github.com/tpruvot) added all the recent features and newer algorythmns
 * [Wolf9466](https://github.com/wolf9466) helped with Intel AES-NI support for CryptoNight
 

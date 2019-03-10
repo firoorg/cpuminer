@@ -20,7 +20,7 @@ extracflags="$extracflags -Ofast -flto -fuse-linker-plugin -ftree-loop-if-conver
 
 if [ ! "0" = `cat /proc/cpuinfo | grep -c avx` ]; then
     # march native doesn't always works, ex. some Pentium Gxxx (no avx)
-    extracflags="$extracflags -march=native"
+    extracflags="$extracflags "
 fi
 
 ./configure --with-crypto --with-curl CFLAGS="-O2 $extracflags -DUSE_ASM -pg"
