@@ -61,6 +61,9 @@ int mtp_solver(uint32_t TheNonce, argon2_instance_t *instance,
 int mtp_solver_nowriting(uint32_t TheNonce, argon2_instance_t *instance,
 	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget);
 
+uint32_t mtp_solver_nowriting_multi(uint32_t TheNonce, argon2_instance_t *instance,
+	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget);
+
 void mtp_init_parallel(int nthread, int thr_id, argon2_instance_t *instance, uint8_t  *elements);
 
 // MerkleTree::Elements mtp_init(argon2_instance_t *instance);

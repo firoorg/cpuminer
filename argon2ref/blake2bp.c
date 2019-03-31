@@ -124,7 +124,7 @@ int blake2bp_init_key( blake2bp_state *S, size_t outlen, const void *key, size_t
     memcpy( block, key, keylen );
 
     for( i = 0; i < PARALLELISM_DEGREE; ++i )
-      blake2b_update( S->S[i], block, ablake2b_BLOCKBYTES);
+      ablake2b_update( S->S[i], block, ablake2b_BLOCKBYTES);
 
     secure_zero_memory( block, ablake2b_BLOCKBYTES); /* Burn the key from stack */
   }
@@ -144,7 +144,7 @@ int blake2bp_update( blake2bp_state *S, const void *pin, size_t inlen )
     memcpy( S->buf + left, in, fill );
 
     for( i = 0; i < PARALLELISM_DEGREE; ++i )
-      blake2b_update( S->S[i], S->buf + i * ablake2b_BLOCKBYTES, ablake2b_BLOCKBYTES);
+      ablake2b_update( S->S[i], S->buf + i * ablake2b_BLOCKBYTES, ablake2b_BLOCKBYTES);
 
     in += fill;
     inlen -= fill;
@@ -167,7 +167,7 @@ int blake2bp_update( blake2bp_state *S, const void *pin, size_t inlen )
 
     while( inlen__ >= PARALLELISM_DEGREE * ablake2b_BLOCKBYTES)
     {
-      blake2b_update( S->S[i], in__, ablake2b_BLOCKBYTES);
+      ablake2b_update( S->S[i], in__, ablake2b_BLOCKBYTES);
       in__ += PARALLELISM_DEGREE * ablake2b_BLOCKBYTES;
       inlen__ -= PARALLELISM_DEGREE * ablake2b_BLOCKBYTES;
     }
@@ -182,8 +182,6 @@ int blake2bp_update( blake2bp_state *S, const void *pin, size_t inlen )
   S->buflen = left + inlen;
   return 0;
 }
-
-
 
 int blake2bp_final( blake2bp_state *S, void *out, size_t outlen )
 {
@@ -202,21 +200,21 @@ int blake2bp_final( blake2bp_state *S, void *out, size_t outlen )
 
       if( left > ablake2b_BLOCKBYTES) left = ablake2b_BLOCKBYTES;
 
-      blake2b_update( S->S[i], S->buf + i * ablake2b_BLOCKBYTES, left );
+      ablake2b_update( S->S[i], S->buf + i * ablake2b_BLOCKBYTES, left );
     }
 
-    blake2b_final( S->S[i], hash[i], ablake2b_OUTBYTES);
+    ablake2b_final( S->S[i], hash[i], ablake2b_OUTBYTES);
   }
 
   for( i = 0; i < PARALLELISM_DEGREE; ++i )
-    blake2b_update( S->R, hash[i], ablake2b_OUTBYTES);
+    ablake2b_update( S->R, hash[i], ablake2b_OUTBYTES);
 
-  return blake2b_final( S->R, out, S->outlen );
+  return ablake2b_final( S->R, out, S->outlen );
 }
 
-int blake2bp( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen )
+int blake2bp(uint8_t hash[4][ablake2b_OUTBYTES], void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen )
 {
-  uint8_t hash[PARALLELISM_DEGREE][ablake2b_OUTBYTES];
+//  uint8_t hash[PARALLELISM_DEGREE][ablake2b_OUTBYTES];
   ablake2b_state S[PARALLELISM_DEGREE][1];
   ablake2b_state FS[1];
   size_t i;
@@ -233,7 +231,10 @@ int blake2bp( void *out, size_t outlen, const void *in, size_t inlen, const void
   if( keylen > ablake2b_KEYBYTES) return -1;
 
   for( i = 0; i < PARALLELISM_DEGREE; ++i )
-    if( blake2bp_init_leaf( S[i], outlen, keylen, i ) < 0 ) return -1;
+    if( blake2bp_init_leaf( S[i], outlen, keylen, i ) < 0 ) {
+	 printf("error\n");
+	 return -1;
+	}
 
   S[PARALLELISM_DEGREE - 1]->last_node = 1; /* mark last node */
 
@@ -244,7 +245,7 @@ int blake2bp( void *out, size_t outlen, const void *in, size_t inlen, const void
     memcpy( block, key, keylen );
 
     for( i = 0; i < PARALLELISM_DEGREE; ++i )
-      blake2b_update( S[i], block, ablake2b_BLOCKBYTES);
+      ablake2b_update( S[i], block, ablake2b_BLOCKBYTES);
 
     secure_zero_memory( block, ablake2b_BLOCKBYTES); /* Burn the key from stack */
   }
@@ -265,7 +266,7 @@ int blake2bp( void *out, size_t outlen, const void *in, size_t inlen, const void
 
     while( inlen__ >= PARALLELISM_DEGREE * ablake2b_BLOCKBYTES)
     {
-      blake2b_update( S[i], in__, ablake2b_BLOCKBYTES);
+      ablake2b_update( S[i], in__, ablake2b_BLOCKBYTES);
       in__ += PARALLELISM_DEGREE * ablake2b_BLOCKBYTES;
       inlen__ -= PARALLELISM_DEGREE * ablake2b_BLOCKBYTES;
     }
@@ -274,88 +275,110 @@ int blake2bp( void *out, size_t outlen, const void *in, size_t inlen, const void
     {
       const size_t left = inlen__ - i * ablake2b_BLOCKBYTES;
       const size_t len = left <= ablake2b_BLOCKBYTES ? left : ablake2b_BLOCKBYTES;
-      blake2b_update( S[i], in__, len );
+      ablake2b_update( S[i], in__, len );
     }
 
-    blake2b_final( S[i], hash[i], ablake2b_OUTBYTES);
+    ablake2b_final( S[i], hash[i], ablake2b_OUTBYTES);
   }
-
+/*
   if( blake2bp_init_root( FS, outlen, keylen ) < 0 )
     return -1;
 
-  FS->last_node = 1; /* Mark as last node */
+  FS->last_node = 1; // Mark as last node 
 
   for( i = 0; i < PARALLELISM_DEGREE; ++i )
-    blake2b_update( FS, hash[i], ablake2b_OUTBYTES);
+    ablake2b_update( FS, hash[i], ablake2b_OUTBYTES);
 
-  return blake2b_final( FS, out, outlen );
+  return ablake2b_final( FS, out, outlen );
+*/
 }
 
 
-#if defined(BLAKE2BP_SELFTEST)
-#include <string.h>
-#include "blake2-kat.h"
-int main( void )
+int blake2bp_new(uint8_t hash[4][ablake2b_OUTBYTES], void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen)
 {
-  uint8_t key[BLAKE2B_KEYBYTES];
-  uint8_t buf[BLAKE2_KAT_LENGTH];
-  size_t i, step;
+	//  uint8_t hash[PARALLELISM_DEGREE][ablake2b_OUTBYTES];
+	ablake2b_state S[PARALLELISM_DEGREE][1];
+	ablake2b_state FS[1];
+	size_t i;
 
-  for( i = 0; i < BLAKE2B_KEYBYTES; ++i )
-    key[i] = ( uint8_t )i;
+	/* Verify parameters */
+	if (NULL == in && inlen > 0) return -1;
 
-  for( i = 0; i < BLAKE2_KAT_LENGTH; ++i )
-    buf[i] = ( uint8_t )i;
+	if (NULL == out) return -1;
 
-  /* Test simple API */
-  for( i = 0; i < BLAKE2_KAT_LENGTH; ++i )
-  {
-    uint8_t hash[BLAKE2B_OUTBYTES];
-    blake2bp( hash, BLAKE2B_OUTBYTES, buf, i, key, BLAKE2B_KEYBYTES );
+	if (NULL == key && keylen > 0) return -1;
 
-    if( 0 != memcmp( hash, blake2bp_keyed_kat[i], BLAKE2B_OUTBYTES ) )
-    {
-      goto fail;
-    }
-  }
+	if (!outlen || outlen > ablake2b_OUTBYTES) return -1;
 
-  /* Test streaming API */
-  for(step = 1; step < BLAKE2B_BLOCKBYTES; ++step) {
-    for (i = 0; i < BLAKE2_KAT_LENGTH; ++i) {
-      uint8_t hash[BLAKE2B_OUTBYTES];
-      blake2bp_state S;
-      uint8_t * p = buf;
-      size_t mlen = i;
-      int err = 0;
+	if (keylen > ablake2b_KEYBYTES) return -1;
 
-      if( (err = blake2bp_init_key(&S, BLAKE2B_OUTBYTES, key, BLAKE2B_KEYBYTES)) < 0 ) {
-        goto fail;
-      }
+	for (i = 0; i < PARALLELISM_DEGREE; ++i)
+		if (blake2bp_init_leaf(S[i], outlen, keylen, i) < 0) {
+			printf("error\n");
+			return -1;
+		}
 
-      while (mlen >= step) {
-        if ( (err = blake2bp_update(&S, p, step)) < 0 ) {
-          goto fail;
-        }
-        mlen -= step;
-        p += step;
-      }
-      if ( (err = blake2bp_update(&S, p, mlen)) < 0) {
-        goto fail;
-      }
-      if ( (err = blake2bp_final(&S, hash, BLAKE2B_OUTBYTES)) < 0) {
-        goto fail;
-      }
+	S[PARALLELISM_DEGREE - 1]->last_node = 1; /* mark last node */
 
-      if (0 != memcmp(hash, blake2bp_keyed_kat[i], BLAKE2B_OUTBYTES)) {
-        goto fail;
-      }
-    }
-  }
+	if (keylen > 0)
+	{
+		uint8_t block[ablake2b_BLOCKBYTES];
+		memset(block, 0, ablake2b_BLOCKBYTES);
+		memcpy(block, key, keylen);
 
-  puts( "ok" );
-  return 0;
-fail:
-  puts("error");
-  return -1;
-}
+		for (i = 0; i < PARALLELISM_DEGREE; ++i)
+			ablake2b_update(S[i], block, ablake2b_BLOCKBYTES);
+
+		secure_zero_memory(block, ablake2b_BLOCKBYTES); /* Burn the key from stack */
+	}
+
+#if defined(_OPENMP)
+#pragma omp parallel shared(S,hash), num_threads(PARALLELISM_DEGREE)
+#else
+
+	for (i = 0; i < PARALLELISM_DEGREE; ++i)
 #endif
+	{
+#if defined(_OPENMP)
+		size_t      i = omp_get_thread_num();
+#endif
+		size_t inlen__ = inlen;
+		const unsigned char *in__ = (const unsigned char *)in;
+		in__ += i * inlen;
+
+		while (inlen__ >= 1 * ablake2b_BLOCKBYTES)
+		{
+			ablake2b_update(S[i], in__, ablake2b_BLOCKBYTES);
+			in__ += 1 * ablake2b_BLOCKBYTES;
+			inlen__ -= 1 * ablake2b_BLOCKBYTES;
+		}
+/*
+		if (inlen__ > 1 * ablake2b_BLOCKBYTES)
+		{
+			const size_t left = inlen__ - 1 * ablake2b_BLOCKBYTES;
+			const size_t len = left <= ablake2b_BLOCKBYTES ? left : ablake2b_BLOCKBYTES;
+			ablake2b_update(S[i], in__, len);
+		}
+*/
+		if (inlen__ < 1 * ablake2b_BLOCKBYTES)
+		{
+			const size_t left = inlen__ /*- 1 * ablake2b_BLOCKBYTES*/;
+			const size_t len = left <= ablake2b_BLOCKBYTES ? left : ablake2b_BLOCKBYTES;
+			ablake2b_update(S[i], in__, len);
+		}
+
+		ablake2b_final(S[i], hash[i],32); // ablake2b_OUTBYTES);
+	}
+	/*
+	if( blake2bp_init_root( FS, outlen, keylen ) < 0 )
+	return -1;
+
+	FS->last_node = 1; // Mark as last node
+
+	for( i = 0; i < PARALLELISM_DEGREE; ++i )
+	ablake2b_update( FS, hash[i], ablake2b_OUTBYTES);
+
+	return ablake2b_final( FS, out, outlen );
+	*/
+}
+

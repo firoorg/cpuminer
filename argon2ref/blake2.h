@@ -110,8 +110,8 @@ int blake2bp_init(blake2bp_state *S, size_t outlen);
 int blake2bp_init_key(blake2bp_state *S, size_t outlen, const void *key, size_t keylen);
 int blake2bp_update(blake2bp_state *S, const void *in, size_t inlen);
 int blake2bp_final(blake2bp_state *S, void *out, size_t outlen);
-
-
+int blake2bp(uint8_t hash[4][ablake2b_OUTBYTES], void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen);
+int blake2bp_new(uint8_t hash[4][ablake2b_OUTBYTES], void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen);
 
 #if defined(__cplusplus)
 }

@@ -97,30 +97,30 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 	pthread_mutex_unlock(&work_lock);
 
 	
-	uint32_t throughput = 1;
+	uint32_t throughput = 128;
 	uint32_t foundNonce = first_nonce;
 
 	do {
-
+ 
 
 		if (foundNonce != UINT32_MAX && work_restart[thr_id].restart != 1)
 		{
 			uint256 TheUint256Target[1];
 			TheUint256Target[0] = ((uint256*)ptarget)[0];
 
-			uint32_t is_sol = mtp_solver_nowriting(foundNonce, &instance,TheMerkleRoot, endiandata, TheUint256Target[0]);
+			uint32_t is_sol = mtp_solver_nowriting_multi(foundNonce, &instance,TheMerkleRoot, endiandata, TheUint256Target[0]);
 
 
-			if (is_sol == 1 && !work_restart[thr_id].restart) {
+			if (is_sol >= 1 && !work_restart[thr_id].restart) {
 
 				uint64_t nBlockMTP[MTP_L * 2][128];
 				unsigned char nProofMTP[MTP_L * 3 * 353];
 
-				int res = mtp_solver(foundNonce, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, *ordered_tree, endiandata, TheUint256Target[0]);
+				int res = mtp_solver(is_sol, &instance, nBlockMTP, nProofMTP, TheMerkleRoot, mtpHashValue, *ordered_tree, endiandata, TheUint256Target[0]);
 
 				if (res==0) printf("does not validate\n");
 				
-				pdata[19] = foundNonce;
+				pdata[19] = is_sol;
 
 				/// fill mtp structure
 				mtp->MTPVersion = 0x1000;

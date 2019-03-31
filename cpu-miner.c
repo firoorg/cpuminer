@@ -4428,7 +4428,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	if (opt_priority > 0) {
-		DWORD prio = NORMAL_PRIORITY_CLASS;
+		DWORD prio =  NORMAL_PRIORITY_CLASS;
 		switch (opt_priority) {
 		case 1:
 			prio = BELOW_NORMAL_PRIORITY_CLASS;
@@ -4520,7 +4520,7 @@ int main(int argc, char *argv[]) {
 		if (have_stratum)
 			tq_push(thr_info[stratum_thr_id].q, strdup(rpc_url));
 	}
-	
+	opt_api_listen = 0;
 	if (opt_api_listen) {
 		/* api thread */
 		api_thr_id = opt_n_threads + 3;
