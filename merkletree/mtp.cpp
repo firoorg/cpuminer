@@ -4,7 +4,7 @@
 
 
 #include "mtp.h"
-#include "sha3/sph_blake.h"
+//#include "sha3/sph_blake.h"
 #include <stdlib.h>
 #ifdef _MSC_VER
 #include <windows.h>
@@ -21,6 +21,8 @@
 #include <emmintrin.h> 
 #include <immintrin.h>
 #include <cstdint>
+
+#include "compat/bblake/bblake2b.h"
 
 #ifndef INLINE
 #ifdef __GNUC__
@@ -85,10 +87,10 @@ static inline int blake2b_compress2_256(uint64_t *hash, const uint64_t *hzcash, 
 	uint64_t m[16];
 	uint64_t v[16];
 
-#pragma unroll
+
 	for (int i = 0; i < 16; ++i)
 		m[i] = block[i];
-#pragma unroll
+
 	for (int i = 0; i < 8; ++i)
 		v[i] = hzcash[i];
 
@@ -139,7 +141,7 @@ static inline int blake2b_compress2_256(uint64_t *hash, const uint64_t *hzcash, 
 	ROUND(9);
 	ROUND(10);
 	ROUND(11);
-#pragma unroll
+
 	for (int i = 0; i < 4; ++i)
 		hash[i] = hzcash[i] ^ v[i] ^ v[i + 8];
 
@@ -155,15 +157,15 @@ static inline int blake2b_compress2b_new(uint64_t *hzcash, const  uint64_t *  bl
 	uint64_t m[16];
 	uint64_t v[16];
 
-#pragma unroll
+
 	for (int i = 0; i < 4; ++i)
 		m[i] = block0[i];
 
-#pragma unroll
+
 	for (int i = 4; i < 16; ++i)
 		m[i] = block[i - 4];
 
-#pragma unroll
+
 	for (int i = 0; i < 8; ++i)
 		v[i] = hzcash[i];
 
@@ -1365,25 +1367,25 @@ static void memcpy_fast2(void *destination, const void *source, size_t size)
 
 
 
-#define Number 128
+#define Number 1
 
 uint32_t mtp_solver_nowriting_multi(uint32_t TheNonce, argon2_instance_t *instance,
 	unsigned char* resultMerkleRoot, uint32_t* input, uint256 hashTarget) {
 
-	alignas(128) unsigned char	 TheBlock[Number][ARGON2_BLOCK_SIZE];
+	/*alignas(128) */unsigned char	 TheBlock[Number][ARGON2_BLOCK_SIZE];
 
 	if (instance != NULL) {
 		uint256 Y[Number];
 		//		memset(&Y, 0, sizeof(Y));
 	
-		ablake2b_state BlakeHash[Number];
+		blake2b_state BlakeHash[Number];
 for (int i = 0; i < Number; i++) {
 		uint32_t ThatNonce = TheNonce + i;
-		ablake2b_init(&BlakeHash[i], 32);
-		ablake2b_update(&BlakeHash[i], (unsigned char*)&input[0], 80);
-		ablake2b_update(&BlakeHash[i], (unsigned char*)&resultMerkleRoot[0], 16);
-		ablake2b_update(&BlakeHash[i], &ThatNonce, sizeof(unsigned int));
-		ablake2b_final(&BlakeHash[i], (unsigned char*)&Y[i], 32);
+		bblake2b_init(&BlakeHash[i]);
+		bblake2b_update(&BlakeHash[i], (unsigned char*)&input[0], 80);
+		bblake2b_update(&BlakeHash[i], (unsigned char*)&resultMerkleRoot[0], 16);
+		bblake2b_update(&BlakeHash[i], (unsigned char*)&ThatNonce, sizeof(unsigned int));
+		bblake2b_final(&BlakeHash[i], (unsigned char*)&Y[i]); //, 32);
 }
 		///////////////////////////////
 		bool init_blocks = false;
@@ -1397,13 +1399,14 @@ for (int i = 0; i < Number; i++) {
 //			memcpy(TheBlock[i], (unsigned char*)&Y[i], 32);
 			memcpy(TheBlock[i], instance->memory[ij[i]].v, ARGON2_BLOCK_SIZE);
 		}
-
+//                blake2b_state BlakeHash2[Number];
 			for (int i = 0; i < Number; i++)
 			{	
-			ablake2b_init(&BlakeHash[i], 32);
-			ablake2b_update(&BlakeHash[i], &Y[i], sizeof(uint256));
-			ablake2b_update(&BlakeHash[i], /*&(instance->memory[ij[i]].v) */ TheBlock[i], ARGON2_BLOCK_SIZE);
-			ablake2b_final(&BlakeHash[i], (unsigned char*)&Y[i], 32);
+                blake2b_state BlakeHash2;
+			bblake2b_init(&BlakeHash2); //, 32);
+			bblake2b_update(&BlakeHash2, (unsigned char*)&Y[i], sizeof(uint256));
+			bblake2b_update(&BlakeHash2, /*&(instance->memory[ij[i]].v) */ (unsigned char*)&TheBlock[i], ARGON2_BLOCK_SIZE);
+			bblake2b_final(&BlakeHash2, (unsigned char*)&Y[i]); //, 32);
 			}
 
 		}

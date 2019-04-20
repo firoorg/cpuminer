@@ -139,7 +139,7 @@ AM_CONDITIONAL([ARCH_ARM], [test x$have_arm = xtrue])
 AM_CONDITIONAL([MINGW], [test "x$OS" = "xWindows_NT"])
 
 if test x$request_jansson = xtrue ; then
-	JANSSON_LIBS="compat/bos-jansson/libbosjansson.a"
+	JANSSON_LIBS="compat/bos-jansson/libbosjansson.a libblake2b.a"
 else
 	JANSSON_LIBS=-lbosjansson
 fi
@@ -152,7 +152,7 @@ if test -n "$with_curl" ; then
    LIBCURL_CFLAGS="$LIBCURL_CFLAGS -I$with_curl/include"
    LIBCURL_CPPFLAGS="$LIBCURL_CPPFLAGS -I$with_curl/include"
    LIBCURL_LDFLAGS="-L$with_curl/lib $LIBCURL_LDFLAGS"
-   LIBCURL="-lcurl -lz"
+   LIBCURL="-lcurl -lz "
 fi
 
 # SSL install path (for mingw : --with-crypto=/usr/local/ssl)

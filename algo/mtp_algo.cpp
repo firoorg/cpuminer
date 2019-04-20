@@ -97,7 +97,7 @@ int scanhash_mtp(int nthreads, int thr_id, struct work* work, uint32_t max_nonce
 	pthread_mutex_unlock(&work_lock);
 
 	
-	uint32_t throughput = 128;
+	uint32_t throughput = 1;
 	uint32_t foundNonce = first_nonce;
 
 	do {

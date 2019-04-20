@@ -120,6 +120,7 @@ cpuminer_SOURCES = \
   argon2ref/argon2.h  argon2ref/blake2.h    \
   argon2ref/blamka-round-opt.h  argon2ref/core.c   \           
   argon2ref/encoding.c  argon2ref/ref.c   argon2ref/thread.h \
+  compat/bblake/bblake2b.h \
   base58.cpp
 
 
@@ -146,8 +147,8 @@ endif
 
 cpuminer_LDFLAGS	= @LDFLAGS@ 
 cpuminer_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
-cpuminer_CPPFLAGS = -mavx2 -fno-strict-aliasing -std=gnu++11 @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)
-cpuminer_CFLAGS   = -mavx2 -Wno-pointer-sign -Wno-pointer-to-int-cast $(disable_flags)
+cpuminer_CPPFLAGS = -mavx -fno-strict-aliasing -std=gnu++11 @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)
+cpuminer_CFLAGS   = -mavx -Wno-pointer-sign -Wno-pointer-to-int-cast $(disable_flags)
 
 if HAVE_WINDOWS
 cpuminer_CFLAGS += -Wl,--stack,10485760

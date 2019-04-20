@@ -657,6 +657,9 @@
     <ClInclude Include="argon2ref\blake2b-round.h">
       <Filter>argon2ref</Filter>
     </ClInclude>
+    <ClInclude Include="compat\bblake\bblake2b.h">
+      <Filter>compat</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sph">
