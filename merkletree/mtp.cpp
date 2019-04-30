@@ -22,7 +22,7 @@
 #include <immintrin.h>
 #include <cstdint>
 
-#include "compat/bblake/bblake2b.h"
+//#include "compat/bblake/bblake2b.h"
 
 #ifndef INLINE
 #ifdef __GNUC__
@@ -1378,14 +1378,14 @@ uint32_t mtp_solver_nowriting_multi(uint32_t TheNonce, argon2_instance_t *instan
 		uint256 Y[Number];
 		//		memset(&Y, 0, sizeof(Y));
 	
-		blake2b_state BlakeHash[Number];
+		blake2b_state BlakeHash;
 for (int i = 0; i < Number; i++) {
 		uint32_t ThatNonce = TheNonce + i;
-		bblake2b_init(&BlakeHash[i]);
-		bblake2b_update(&BlakeHash[i], (unsigned char*)&input[0], 80);
-		bblake2b_update(&BlakeHash[i], (unsigned char*)&resultMerkleRoot[0], 16);
-		bblake2b_update(&BlakeHash[i], (unsigned char*)&ThatNonce, sizeof(unsigned int));
-		bblake2b_final(&BlakeHash[i], (unsigned char*)&Y[i]); //, 32);
+		bblake2b_init(&BlakeHash);
+		bblake2b_update(&BlakeHash, (unsigned char*)&input[0], 80);
+		bblake2b_update(&BlakeHash, (unsigned char*)&resultMerkleRoot[0], 16);
+		bblake2b_update(&BlakeHash, (unsigned char*)&ThatNonce, sizeof(unsigned int));
+		bblake2b_final(&BlakeHash, (unsigned char*)&Y[i]); //, 32);
 }
 		///////////////////////////////
 		bool init_blocks = false;

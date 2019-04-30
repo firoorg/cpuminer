@@ -7,9 +7,13 @@
 #define LIB_PUBLIC
 #endif
 
+
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 typedef struct blake2b_state_t {
 	unsigned char opaque[256];

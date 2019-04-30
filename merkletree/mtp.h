@@ -5,8 +5,12 @@
 #define ZCOIN_MTP_H
 
 #endif //ZCOIN_MTP_H
-
-
+#if defined(__cplusplus)
+extern "C"
+{
+#include "compat/bblake/bblake2b.h"
+}
+#endif
 
 #include "merkle-tree.hpp"
 

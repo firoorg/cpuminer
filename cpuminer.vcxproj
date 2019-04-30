@@ -151,11 +151,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;SCRYPT_KECCAK512;SCRYPT_CHACHA;SCRYPT_CHOOSE_COMPILETIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.;compat;compat\curl-for-windows\curl\include;compat\getopt;compat\bos-jansson;compat\pthreads;compat\curl-for-windows\openssl\openssl\include;compat\curl-for-windows\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;compat;compat\curl-for-windows\curl\include;compat\getopt;compat\bos-jansson;compat\pthreads;compat\curl-for-windows\openssl\openssl\include;compat\curl-for-windows\zlib;compat\bblake;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>
       <CompileAs>Default</CompileAs>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
@@ -164,15 +164,17 @@
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <StringPooling>true</StringPooling>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>blake2b.dll.lib;blake2b.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;pthreadVC2.lib;libeay32MT.lib;libsslMT.lib;ssleay32MT.lib;libcurl.lib;zlibstat.lib;ws2_32.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>blake2b.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;pthreadVC2.lib;libeay32MT.lib;libsslMT.lib;ssleay32MT.lib;libcurl.lib;zlibstat.lib;ws2_32.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>compat\pthreads\x64;compat\curl-for-windows\out\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
       <LinkStatus>false</LinkStatus>
       <LargeAddressAware>true</LargeAddressAware>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
@@ -182,9 +184,10 @@
       <HeapReserveSize>100000000</HeapReserveSize>
       <StackReserveSize>100000000</StackReserveSize>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
-      <AssemblyDebug>true</AssemblyDebug>
       <CreateHotPatchableImage>X64Image</CreateHotPatchableImage>
-      <PreventDllBinding>false</PreventDllBinding>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT %(AdditionalOptions)</AdditionalOptions>
+      <AssemblyDebug>true</AssemblyDebug>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -343,7 +346,6 @@
     <ClInclude Include="argon2ref\encoding.h" />
     <ClInclude Include="argon2ref\thread.h" />
     <ClInclude Include="compat.h" />
-    <ClInclude Include="compat\bblake\bblake2b.h" />
     <ClInclude Include="compat\bos-jansson\bosjansson.h" />
     <ClInclude Include="compat\bos-jansson\hashtable.h" />
     <ClInclude Include="compat\bos-jansson\jansson_config.h" />
