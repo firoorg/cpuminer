@@ -26,6 +26,6 @@ fi
 ./configure --with-crypto --with-curl CFLAGS="-O2 $extracflags -DUSE_ASM -pg"
 
 
-make -j$(nproc)
+make -j$(nproc --ignore=2)
 
 strip -s cpuminer
