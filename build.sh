@@ -14,7 +14,7 @@ make clean || echo clean
 rm -f config.status
 
 # Run autogen
-./autogen.sh || echo done
+sh autogen.sh || echo done
 
 # Configure build
 ./configure --with-crypto --with-curl CFLAGS="-O2 -flto -fuse-linker-plugin -ftree-loop-if-convert-stores -march=native -DUSE_ASM -pg"
