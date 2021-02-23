@@ -90,8 +90,8 @@ Dependencies
 
 Download
 ========
- * Windows releases: https://github.com/tpruvot/cpuminer-multi/releases
- * Git tree:   https://github.com/tpruvot/cpuminer-multi
+ * Windows releases: https://github.com/firoorg/cpuminer/releases
+ * Git tree:   https://github.com/firoorg/cpuminer
    * Clone with `git clone https://github.com/tpruvot/cpuminer-multi`
 
 Build
@@ -102,15 +102,11 @@ Build
 _OR_
 
 ```
- ./autogen.sh	# only needed if building from git repo
- ./nomacro.pl	# only needed if building on Mac OS X or with Clang
- ./configure CFLAGS="*-march=native*" --with-crypto --with-curl
-
- _FOR_MTP_
- ./configure  --with-crypto --with-curl
+ sh autogen.sh	# only needed if building from git repo
+ sh configure CFLAGS="*-march=native*" --with-crypto --with-curl
 
  # Use -march=native if building for a single machine
- make
+ make -j$(proc --all --ignore 2)
 ```
 
 #### Note for Debian/Ubuntu users:
