@@ -1,31 +1,27 @@
 #!/bin/bash
 
+# Checking Windows OS for extra configs.
 if [ "$OS" = "Windows_NT" ]; then
     ./mingw64.sh
     exit 0
 fi
 
-# Linux build
+# BE SURE TO RUN autoge.sh ONCE, OTHERWISE make clean WILL FAILS.
 
-make clean || echo clean
-
+# Cleaning build sources
+make clean # echo is too fast to be viewed
 rm -f config.status
-./autogen.sh || echo done
 
-# Ubuntu 10.04 (gcc 4.4)
-# extracflags="-O3 -march=native -Wall -D_REENTRANT -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16"
+# Running autogen. Be sure to run it once if downloaded from git
+sh autogen.sh
 
-# Debian 7.7 / Ubuntu 14.04 (gcc 4.7+)
-extracflags="$extracflags -Ofast -flto -fuse-linker-plugin -ftree-loop-if-convert-stores"
+# Configuring the package
+# -Ofast is just too much for what we need and gcc does not officially accept it as flag for "normal" purpouses
+# -O2 is just fine.
+sh configure --with-crypto --with-curl CFLAGS="-O2 -flto -fuse-linker-plugin -ftree-loop-if-convert-stores -DUSE_ASM -pg"
 
-if [ ! "0" = `cat /proc/cpuinfo | grep -c avx` ]; then
-    # march native doesn't always works, ex. some Pentium Gxxx (no avx)
-    extracflags="$extracflags "
-fi
+# Make the package
+make -j$(nproc --all --ignore=2) # --all checks if there are more CPUs avaiable
 
-./configure --with-crypto --with-curl CFLAGS="-O2 $extracflags -DUSE_ASM -pg"
-
-
-make -j$(nproc --ignore=2)
-
+# Stripping package
 strip -s cpuminer
